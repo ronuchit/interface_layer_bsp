@@ -36,7 +36,7 @@ The additional skolem functions needed to support this functionality
 are \emph{ViewPose}(Obj) and \emph{ViewPose}(Traj) for each object and
 trajectory in our skolemized representation. The generator for object
 view poses draws samples from a 1-meter unit disc around the
-object. The head pose is fixed to point at the object's maximum
+object, and the head pose is fixed to point at the object's maximum
 likelihood position. The generator for trajectory view poses returns
 the first step along the trajectory that has non-negligible probability of being
 in collision. To observe the uncertain step, a viable base pose is sampled from regions with negligible collision probability along the same trajectory.
@@ -59,11 +59,11 @@ We account for negative observations with a factored representation for
 the belief state. In one component, we maintain a distribution that
 accounts for positive observations (e.g., a Kalman filter). The other component is an explicit
 representation of the view cones associated with negative
-observations. We refer to the first component as positive
+observations. We refer to the first component as the positive
 observation distribution and the second as the negative regions. To
 sample from this distribution, we perform probabilistic rejection sampling: sample from the positive observation distribution and then discard
 the sample in inverse proportion to the probability that it lies in a
-negative observation region. The inverse probability is given by $\max(1,\frac{\text{penetration distance}}{\text{object radius}})$, where object radius is found by approximating the object as a sphere.
+negative observation region. The inverse probability is given by $\max(1,\frac{\text{penetration depth}}{\text{object radius}})$, where penetration depth is defined as the minimum translation that takes two objects out of collision and object radius is found by approximating the object as a sphere.
 
 
 \subsection{Evaluations}
@@ -83,9 +83,7 @@ and present it with the goal of traversing the corridor, then grasping
 objects on tables on the other side. Uniform distributions model the locations of
 a varying number of obstructing columns throughout the corridor; thus, the solution
 typically ends up as an alternating sequence of observations and motions. Note that this task would be essentially
-insoluble without accounting for negative observations appropriately: without negative
-observations, we might need to traverse the region we are checking in
-order to view the object.
+insoluble without accounting for negative observations appropriately.
 
 The second task demonstrates the ability to reason about occlusions. We
 set a goal of grasping a target object from a cluttered table with other
@@ -112,10 +110,10 @@ states for the corridor and drawer tasks. The included video demonstrates plan e
 \begin{table}
   \centering
   \vspace{8pt}
-  \tabcolsep=0.05cm{
+  \tabcolsep=0.11cm{
   \begin{tabular}{cccc}
     \toprule
-      Problem Type & \% Solved in 1800s & Avg Solution Time(s) & Avg \# Planner Runs\\
+      Problem Type & \% Solved & Avg Time (s) & Avg \# Planner Runs\\
     \midrule
       Uni. corridor, 1 obj & 100 & 232 & 1.88\\
     \midrule
@@ -143,8 +141,7 @@ states for the corridor and drawer tasks. The included video demonstrates plan e
   \caption{Solution percentages, running times, and number of high-level planner calls for \ibsp{} in
     occluded search and navigation tasks. Unimodal cluttered table results are from 40
     randomly generated problems per number of objects. Multimodal 3-drawer search results
-    are from 30 iterations. Uniform corridor navigation results are from 40 randomly
-    generated locations of corridor obstructions, per number of objects.}
+    are from 30 iterations. Uniform corridor navigation results are from 40 random locations of corridor obstructions, per number of objects. Timeout: 1800s.}
   \label{table:results}
 \end{table}
 
