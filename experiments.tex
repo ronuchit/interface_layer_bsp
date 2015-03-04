@@ -108,7 +108,7 @@ The new refinement incorporates this negative observation, and the system may th
 
 Table \ref{table:results} shows timing results for the three described
 tasks. \figref{fig:corridorimgs} and \figref{fig:drawerimgs} show intermediate steps and belief
-states for the corridor and drawer tasks.
+states for the corridor and drawer tasks. The included video demonstrates plan execution in each domain.
 
 \begin{table}
   \centering
@@ -160,66 +160,58 @@ states for the corridor and drawer tasks.
   \end{subfigure}
   \begin{subfigure}[b]{0.22\linewidth}
     \includegraphics[width=\textwidth]{corridor_images/1-observe.png}
-    \caption{after 1 observations}
+    \caption{After 1 observations}
     \label{fig:step2}
   \end{subfigure}
   \begin{subfigure}[b]{0.22\linewidth}
     \includegraphics[width=\textwidth]{corridor_images/2-observe.png}
-    \caption{after 2 observations}
+    \caption{After 2 observations}
     \label{fig:step3}
   \end{subfigure}
   \begin{subfigure}[b]{0.22\linewidth}
     \includegraphics[width=\textwidth]{corridor_images/3-observe.png}
-    \caption{after 3 observations}
+    \caption{After 3 observations}
     \label{fig:step4}
   \end{subfigure}
   \caption{Execution trace of interfaced belief space planning
-    traversing a corridor with uncertain obstacles to pick an
-    object. The blue cylinders are draws from the belief distribution
+    traversing a corridor with uncertain obstacles.
+    The blue cylinders are drawn from the uniform belief distribution
     during execution. After reaching the other side of the corridor,
-    the robot will search amongst the three table locations in order
-    to pick up its target object, whose distribution is a mixture of
-    Gaussians. The high level representation for both the goal object
-    and the obstructions are the same, despite the very different
-    belief distributions.}
-  \label{fig:experiment}
+    the robot will pick up two target tables from the three tables.}
+  \label{fig:corridorimgs}
 \end{figure*}
 
 \begin{figure*}
   \centering
   \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{drawer_images/init_state.png}
-    \caption{Objects at ML location}
+    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_0.png}
+    \caption{Initial distribution}
     \label{fig:step1}
   \end{subfigure}
   \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{drawer_images/initial_object.png}
-    \caption{Initial belief state of target object}
+    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_1.png}
+    \caption{After observing one drawer}
     \label{fig:step2}
   \end{subfigure}
   \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{drawer_images/initial_obstructions.png}
-    \caption{Initial belief state of obstructions}
-    \label{fig:step3}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{drawer_images/post_object.png}
-    \caption{Belief state of target after 1 observe}
+    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_2.png}
+    \caption{After observing two drawers}
     \label{fig:step4}
   \end{subfigure}
   \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{drawer_images/post_obstructions.png}
-    \caption{Belief state of obstructions after 1 observe}
+    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_negreg.png}
+    \caption{Negative regions}
     \label{fig:step5}
   \end{subfigure}
   \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{drawer_images/true_locs.png}
-    \caption{True state of all objects}
+    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_3.png}
+    \caption{After observing three drawers (object was seen)}
     \label{fig:step6}
   \end{subfigure}
   \caption{Observations for a belief space execution
-    to pick up an object, shown in pink, with a trimodal Gaussian distribution.
-    In this environment the robot observes the current maximum likelihood location
-    of the object, which is updated through positive and negative observations.}
-  \label{fig:experiment}
+    in our drawer search domain with a multimodal Gaussian distribution.
+    In this environment, the robot observes the current maximum likelihood location
+    of the object, which is updated through positive and negative observations. The object's
+    true location is inside the last drawer checked by the robot.}
+  \label{fig:drawerimgs}
 \end{figure*}
