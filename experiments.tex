@@ -75,8 +75,8 @@ and implement custom collision checking in Flexible Collision Library to handle
 collisions. We use the Fast-Forward and Fast-Downward
 task planners to solve our high-level planning problems. Because our system works
 independently of the chosen task planner, we use Fast-Forward in domains involving negative
-preconditions, which are not supported by Fast-Downward. We validate our approach in three
-distinct scenarios.
+preconditions, which are not supported by Fast-Downward. Experiments were run in series on
+Intel Core i7-4770K machines with 16GB RAM. We validate our approach in three distinct scenarios.
 
 To explore ensuring safety in robot navigation tasks under uncertainty, we
 evaluate performance in a corridor domain. We place the robot at one end of a corridor
@@ -96,15 +96,15 @@ distribution. \ibsp{} plans to remove any occlusions, observe the target object,
 then pick it up. In our experiments, we maintain that 3 of the objects on the table -- always including
 the target object -- are part of the belief space.
 
-The final scenario illustrates multimodal planning behavior applied to a setting
-with three drawers, one of which contains a target object to be grasped. We use a
-mixture of Gaussians to model the prior for the target's location.
+In our final scenario, the robot has lost its keys and is trying to locate them among three drawers they could be in.
+This setup illustrates multimodal planning behavior with a mixture of Gaussians as the prior for the target's location.
 Furthermore, we introduce a deterministic object in front of each drawer, which possibly
 obstructs it from being opened. \ibsp{} begins by assuming the target is placed at its maximum likelihood
 location; accordingly, it discovers that the target is obstructed by the drawer containing it, then
 plans to open this drawer. If the outer deterministic object impedes the drawer from opening, this
 obstruction fact is also discovered and accounted for. During execution, upon performing an observation inside the drawer, our system
 chooses to refine the plan if the object was not actually seen (indicating that its true location is in another drawer).
+The new refinement incorporates this negative observation, and the system may then try opening another drawer.
 
 Table \ref{table:results} shows timing results for the three described
 tasks. \figref{fig:corridorimgs} and \figref{fig:drawerimgs} show intermediate steps and belief
