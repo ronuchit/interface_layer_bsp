@@ -1,0 +1,27 @@
+\begin{abstract}
+The execution of long-horizon tasks under uncertainty is a fundamental
+challenge in robotics. Recent approaches have made headway on these
+tasks with an integration of task and motion
+planning~(\cite{srivastava2014combined, dornhege2012semantic,
+  kaelbling2011hierarchical}).  In this paper, we present Interfaced
+Belief Space Planning (\ibsp), a modular approach to task and motion
+planning in belief space. We use a task-independent interface layer to
+combine an off-the-shelf classical planner and motion planner, enabling us to
+solve complex problems in belief space. We determinize
+the problem under the maximum likelihood observation assumption to obtain a
+deterministic representation that can generate reasonable information-seeking
+behavior~(\cite{platt2010belief, bonet2011planning,
+  kaelbling2013integrated}). We leverage properties of maximum
+likelihood determinizations to utilize a simple representation of
+(optimistic) belief space dynamics that is well-suited to
+planning. Our interface can be implemented with standard belief state
+queries, requiring only the ability to sample, compute unnormalized
+likelihoods, and answer maximum likelihood queries. Our contribution
+is a novel algorithm for task and motion planning in belief space. The
+algorithm is a novel approach that substantially reduces dependence on details of the belief
+state dynamics. \ibsp{} can work with a broad class of black box state
+estimators, with zero changes to the algorithm. We show that \ibsp{} is
+complete for a (restricted) class of partially observable problems. We
+validate our approach in simulated tasks for the PR2 that account for
+continuous state, different belief distributions, and negative observations.
+\end{abstract}
