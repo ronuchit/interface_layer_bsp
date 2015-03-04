@@ -15,15 +15,15 @@ can require long, temporally extended plans.
     there is a uniform distribution of obstacles in the way. Our low
     level refinement algorithm detects the probability of obstruction and
     propagates information to the high level. The objects shown are
-    from the posterior distribution after a single negative
-    observation.}
+    from the posterior distribution after several negative
+    observations.}
   \label{fig:knot_steps}
 \end{figure}
 
 
 Discovering a solution to this task necessitates finding a policy that
-accounts for uncertainty in locations of objects, locations of the
-robot and non-determinism in the dynamics (among other
+accounts for uncertainty in locations of objects, uncertainty in robot location,
+and non-determinism in the dynamics (among other
 challenges). Solving such problems exactly is far beyond the state of
 the art in partially observable Markov decision processes.
 
@@ -53,7 +53,7 @@ to suitably modified standard methods; these methods typically
 prescribe solving a complex, continuous, under-actuated
 problem. Integration with task planners provides relief from this
 problem---high level tasks often decompose a problem so that
-observation planning and motion planning are seperate.
+observation planning and motion planning are separate.
 
 We present an algorithm, Interfaced Belief Space Planning (\ibsp),
 that leverages these insights. It extends the domain abstraction
@@ -63,7 +63,7 @@ of an \mld{} to construct a simple high-level representation of belief
 states so that (optimistic) belief state dynamics are compactly
 represented. The algorithm alternates among extracting a plan
 skeleton, assigning values to continuous variables, and updating the
-high level with failure information if a refinement can not be found.
+high level with failure information if a refinement cannot be found.
 \ibsp{} enforces a clear separation among extracting plan skeletons
 from a domain description, refining a plan skeleton, and determining
 success or failure of a plan; furthermore, each component relies on

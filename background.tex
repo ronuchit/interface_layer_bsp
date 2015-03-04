@@ -54,7 +54,7 @@ presence of continuous parameters and conditional effects that depend
 on this parameters (e.g., new obstructions from placing an object)
 prevents directly passing this representation to a classical
 planner. We will need to compile our specification into a discrete
-problem classical planners can readily solve.
+problem that classical planners can readily solve.
 
 \begin{algorithm}
  \caption{An interface for deterministic problems} \label{alg-ifop}
@@ -98,8 +98,8 @@ operation for object $o_i$, we need a reference to the pose of the
 object and the grasp we will use to pick it. We represent these as
 functions: \emph{Pose}($o_i$), \emph{Grasp}($o_i$), and
 \emph{GP}($o_i$, \emph{Pose}($o_i$), \emph{Grasp}($o_i$)). The proper
-interpretation for the last of these is `the pose that we will choose
-to grasp $o_i$ from when it is at\ldots'. These are represented to the
+interpretation for the last of these is `the pose from which we will choose
+to grasp $o_i$ when it is at\ldots'. These are represented to the
 classical planner as standard, discrete objects; we then declare facts
 about these variables that are guaranteed to be true. This process is
 referred to as \emph{skolemization}.
@@ -112,7 +112,7 @@ example, after executing a place action we know that \emph{Loc}($o_i$,
 Pose($o_i$)) will be true, but the particular obstructions introduced
 will depend on the exact bindings of Pose($o_i$). We include the
 former in our description and rely on an interface layer to discover
-conditional facts as they become relevant and update the high level
+conditional facts, such as the latter, as they become relevant and update the high level
 description accordingly. The process of assigning values to the variables
 of a high level plan is called \emph{refinement} of the high level
 plan.

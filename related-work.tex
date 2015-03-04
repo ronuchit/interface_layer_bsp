@@ -38,11 +38,11 @@ approach to handle uncertainty~\cite{kaelbling2013integrated}. Similar
 to our approach, they construct task plans in belief space under
 maximum likelihood determinization. Levihn et al. extend this system
 to construct shorter plans at execution time by smart replanning and
-reconsideration~\cite{levihn2013foresight}. They explicityly formulate
+reconsideration~\cite{levihn2013foresight}. They explicitly formulate
 the regression of belief goals under Gaussian distributions and plan
 with an exact represention ofe belief state dynamics. In contrast, we
-use references to the belief so we can plan with arbitrary beliefs
-representations.
+use references to the belief so we can plan with arbitrary belief
+representations, not just Gaussians.
 
 Srivastava et al. formulate open world POMDPs with a probabilistic
 program~\cite{srivastava2014first} -- they develop a generalization of
@@ -65,7 +65,7 @@ allows fluents to take the value
 \emph{uncertain}~\cite{nebel13aaaiirs}. In their system, however, they
 assume that uncertain items become known once the robot is close
 enough and so do not explicitly plan sensing actions. In contrast, we
-represent uncertainty directly in our representation and combine
+represent uncertainty directly and combine
 reasoning about uncertainty with reasoning about maximum likelihood
 states.
 

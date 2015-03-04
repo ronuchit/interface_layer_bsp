@@ -37,10 +37,10 @@ given the state.
 
 We assume that our operators are separated into \emph{actions}, which
 alter the true state but do not get any information about it, and
-\emph{observations}, which do not alter the true state but generate
-an observation about it. Actions are deterministic in belief space
+\emph{observations}, which do not alter the true state but garner
+information about it. Actions are deterministic in belief space
 (even when the underlying dynamics are not) and follow a similar
-parametrization to the deterministic case. 
+parametrization to the deterministic case.
 
 The source of non-determinism in our specification is confined to
 observations. An observation operator is parametrized by the belief
@@ -88,9 +88,9 @@ and Lozano-P\'erez~\cite{kaelbling2013integrated}.
 
 We will illustrate this simplification with the \emph{Pick}
 operator. To simplify description, we represent objects in the frame
-of the robot and assume that the robot's pose relative to itself is
+of the robot and assume that the robot's pose in its own frame is
 known. It is possible to relax this assumption at the cost of
-introducing more complex descriptions. 
+introducing more complex descriptions.
 
 Using a full belief representation, we have the following
 description:
@@ -118,10 +118,10 @@ successful grasp pose or 2) the maximum likelihood state admits a
 successful grasp, but the distribution has too much variance to allow
 a successful grasp with high probability. In the first case, we must
 manipulate the state, while in the other we must observe it. We
-replace belief fluents with maximum likelihood fluents and
-\emph{uncertainty} fluents:
+thus replace belief fluents with maximum likelihood fluents and
+\emph{uncertainty} fluents:\\
+\emph{MLPick}(o, o\_pose\_bel, r\_pose, grasp)
 \begin{tightlist}
-\item[]\emph{MLPick}(o, o\_pose\_bel, r\_pose, grasp)
 \item[\emph{pre:}] \emph{MLLoc}(o, o\_pose\_bel) $\wedge$
   \emph{MLRLoc}(r\_pose\_bel) \\$\wedge$ \emph{MLGraspPose}(o,
   o\_pose\_bel, r\_pose, grasp) \\$\wedge$
@@ -147,14 +147,14 @@ This corresponds to a conditional effect of the original
 \emph{Observe} operator if we try to include \emph{UncertainGP}
 fluents in that representation: the true effect can only be guaranteed
 with complete knowledge of the true belief. However,
-in order to correct a high level plan, we must include them as a
-possibility. We call this an optimistic observation because the actual
+in order to correct a high level plan, we must include these fluents as a
+possibility. We call this an \emph{optimistic} observation because the actual
 effect is not guaranteed, and we thus rely on the interface layer to discover
 cases when it does not hold and correct our representation. Note that
-this assumption is only made in the description for the high
+this assumption of optimism is only made in the description for the high
 level. The full algorithm plans with a complete belief representation; if
 multiple observations are needed to successfully localize an object, the algorithm
-will plan to take them.
+will plan to do them.
 
 \subsection{The \ibsp{} algorithm}
 \label{sec-ibsp}
@@ -256,7 +256,7 @@ illustrates these ideas.
  \end{algorithmic}
 \end{algorithm}
 An important observation is that these implementations only require
-that we be able to sample from our belief distribution and/or compute
+us to be able to sample from our belief distribution and/or compute
 unnormalized likelihoods. In order to compute the \mld{}, we need to be
 able to compute a maximum likelihood state estimate and maintain a
 filtered distribution. These are generic operations for belief states

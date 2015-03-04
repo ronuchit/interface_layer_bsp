@@ -58,15 +58,14 @@
   %% \end{subfigure}
   \caption{Intermediate belief states from a sample execution in our
     drawer search domain. We search for an object with a multimodel
-    Gaussian distribution over location. We illustrate beliefs with
+    Gaussian distribution over three drawers. We illustrate beliefs with
     samples from the posterior distribution and show likelihoods with
-    the transperancy of objects. In this case, the object was in the
-    leftmost drawer, and was found after searching the other
+    the transparency of objects. In this case, the object was in the
+    leftmost drawer, and it was found after searching the other
     drawers. (a) shows the initial state and (b) and (c) show
     intermediate states where we replanned. Notice that we only clear
-    the obstruction in front of the drawer when the belief is
-    concentrated at the back of the drawer. (d) shows the view cones
-    we generated during planning from negative observations.}
+    the obstruction in front of the drawer when it is close enough to hinder sufficient opening.
+    (d) shows the view cones from negative observations that were generated during planning.}
   \label{fig:drawerimgs}
 \end{figure}
 
@@ -140,7 +139,7 @@ as the positive observation distribution and the second as the
 negative regions. To sample from this distribution, we perform
 probabilistic rejection sampling: sample from the positive observation
 distribution and then discard the sample in inverse proportion to the
-probability that it lies in a negative observation region. The inverse
+probability that it lies in a negative region. The inverse
 probability is given by $\max(1,\dfrac{\text{penetration
     depth}}{\text{object radius}})$, where penetration depth is the
 minimum translation that takes two objects out of collision and object
@@ -186,7 +185,7 @@ The new refinement incorporates this negative observation, and the system may th
 
 Table \ref{table:results} shows timing results for the three described
 tasks. \figref{fig:drawerimgs} shows intermediate steps and belief
-states for the drawer task. The included video demonstrates plan execution all three tasks.
+states for the drawer task. The included video demonstrates plan execution for all three tasks.
 
 \begin{table}
   \centering
@@ -222,7 +221,7 @@ states for the drawer task. The included video demonstrates plan execution all t
   \caption{Solution percentages, running times, and number of high-level planner calls for \ibsp{} in
     occluded search and navigation tasks. Unimodal cluttered table results are from 40
     randomly generated problems per number of objects. Multimodal 3-drawer search results
-    are from 30 iterations. Uniform corridor navigation results are from 40 random locations of corridor obstructions, per number of objects. Timeout: 1800s.}
+    are from 30 iterations. Uniform corridor navigation results are from 40 random locations of corridor obstructions, per number of objects. Time limit: 1800s.}
   \label{table:results}
 \end{table}
 
