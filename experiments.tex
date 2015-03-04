@@ -21,13 +21,13 @@ partial observability, we add the following fluents and operators:
     \emph{MLInView}(r\_obs\_pose, o\_pose)
   \item[\emph{eff}:] $\forall$ r\_p, g $\lnot$\emph{UncertainGP}(o\_pose\_bel, r\_p, g)
 \end{tightlist}
-\emph{ObserveObstruction}(r\_obs\_pose, traj, held\_obj, grasp) 
+\emph{ObserveTrajectory}(r\_obs\_pose, traj) 
 
 \begin{tightlist}
   \item[\emph{pre}:] \emph{MLRLoc}(r\_obs\_pose) \\$\wedge$
     \emph{MLInView}(r\_obs\_pose, traj)\\ $\wedge$
-    $\lnot$\emph{MLOccludes}($o_i$, traj, r\_obs\_pose)
-  \item[\emph{eff}:] $\forall o \lnot$\emph{UncertainObstructs}(o,
+    $\forall o_i \lnot$\emph{MLOccludes}($o_i$, traj, r\_obs\_pose)
+  \item[\emph{eff}:] $\forall o_i \lnot$\emph{UncertainObstructs}($o_i$,
     traj)
 \end{tightlist}
 \end{tightlist}
@@ -39,7 +39,7 @@ view poses draws samples from a 1-meter unit disc around the
 object. The head pose is fixed to point at the object's maximum
 likelihood position. The generator for trajectory view poses returns
 the first step along the trajectory that has non-negligible probability of being
-in collision. Then, we sample a viable base pose from along this trajectory.
+in collision. To observe the uncertain step, a viable base pose is sampled from regions with negligible collision probability along the same trajectory.
 
 \subsection{Observation model and state estimation for the PR2}
 We model observations with ray casting from a simulated head-mounted
@@ -51,27 +51,26 @@ observation, we observe the object's true pose with Gaussian noise.
 
 In order to successfully plan for this domain, it is important that we
 effectively incorporate negative observations into our
-updates. Without negative observations, it is impossible to determine
-that a trajectory is clear without observing actual objects
+updates. Without these negative observations, it is impossible to determine
+if a trajectory is clear without observing actual objects
 locations. 
 
 We account for negative observations with a factored representation for
 the belief state. In one component, we maintain a distribution that
 accounts for positive observations (e.g., a Kalman filter). The other component is an explicit
 representation of the view cones associated with negative
-observations. We refer to the first component as the positive
+observations. We refer to the first component as positive
 observation distribution and the second as the negative regions. To
-sample from this distribution, we perform probabilistic rejection sampling:
-we sample from the positive observation distribution and then discard
+sample from this distribution, we perform probabilistic rejection sampling: sample from the positive observation distribution and then discard
 the sample in inverse proportion to the probability that it lies in a
-negative observation region.
+negative observation region. The inverse probability is given by $\max(1,\frac{\text{penetration distance}}{\text{object radius}})$, where object radius is found by approximating the object as a sphere.
 
 
 \subsection{Evaluations}
 We implement our experiments in Python and use
 OpenRave~\cite{Diankov_2008_6117} to represent the environment. We use
 trajectory optimization for our motion planning~\cite{schulman2013finding}
-and implement custom collision checking in Flexible Collision Library to handle
+and implement custom collision checking in Flexible Collision Library~\cite{jia2014fcl} to handle
 collisions. We use the Fast-Forward and Fast-Downward
 task planners to solve our high-level planning problems. Because our system works
 independently of the chosen task planner, we use Fast-Forward in domains involving negative
@@ -92,8 +91,8 @@ The second task demonstrates the ability to reason about occlusions. We
 set a goal of grasping a target object from a cluttered table with other
 objects on it: some have deterministic locations and others have a Gaussian distribution
 modeling their location. The target object's location is also drawn from a Gaussian
-distribution. \ibsp{} plans to remove any occlusions, observe the target object, and
-then pick it up. In our experiments, we maintain that 3 of the objects on the table -- always including
+distribution. \ibsp{} plans to remove any occlusions, to observe the target object, and
+then to pick it up. In our experiments, we maintain that 3 of the objects on the table -- always including
 the target object -- are part of the belief space.
 
 In our final scenario, the robot has lost its keys and is trying to locate them among three drawers they could be in.
