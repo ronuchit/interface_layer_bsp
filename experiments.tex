@@ -113,36 +113,37 @@ states for the corridor and drawer tasks.
 \begin{table}
   \centering
   \vspace{8pt}
-  \begin{tabular}{lcc}
+  \tabcolsep=0.05cm{
+  \begin{tabular}{cccc}
     \toprule
-      Problem Type & \% Solved in 1800s & Avg Solution Time (s)\\
+      Problem Type & \% Solved in 1800s & Avg Solution Time(s) & Avg \# Planner Runs\\
     \midrule
-      Uniform corridor navigation, 1 obj & 100 & 232\\
+      Uni. corridor, 1 obj & 100 & 232 & 1.88\\
     \midrule
-      Uniform corridor navigation, 2 obj & 100 & 445\\
+      Uni. corridor, 2 obj & 100 & 445 & 2.45\\
     \midrule
-      Uniform corridor navigation, 3 obj & 88 & 926\\
+      Uni. corridor, 3 obj & 88 & 926 & 2.78\\
     \midrule
-      Uniform corridor navigation, 4 obj & 58 & 1168\\
+      Uni. corridor, 4 obj & 58 & 1168 & 2\\
     \midrule
-      Unimodal search, 5 obj & 95 & 89\\
+      Table, 5 obj & 95 & 89 & 2.2\\
     \midrule
-      Unimodal search, 10 obj & 95 & 162\\
+      Table, 10 obj & 95 & 162 & 2.21\\
     \midrule
-      Unimodal search, 15 obj & 83 & 135\\
+      Table, 15 obj & 83 & 135 & 2.26\\
     \midrule
-      Unimodal search, 20 obj & 70 & 229\\
+      Table, 20 obj & 70 & 229 & 2.03\\
     \midrule
-      Unimodal search, 25 obj & 68 & 166\\
+      Table, 25 obj & 68 & 166 & 1.84\\
     \midrule
-      Unimodal search, 30 obj & 48 & 122\\
+      Table, 30 obj & 48 & 122 & 1.96\\
     \midrule
-      Multimodal 3-drawer search & 93 & 325\\
+      3-Drawer search & 93 & 325 & 2.11\\
     \bottomrule
-  \end{tabular}
-  \caption{Solution percentages and running times for \ibsp{} in
+  \end{tabular}}
+  \caption{Solution percentages, running times, and number of high-level planner calls for \ibsp{} in
     occluded search and navigation tasks. Unimodal cluttered table results are from 40
-    randomly generated problems per number of objects. Multimodal drawer search results
+    randomly generated problems per number of objects. Multimodal 3-drawer search results
     are from 30 iterations. Uniform corridor navigation results are from 40 randomly
     generated locations of corridor obstructions, per number of objects.}
   \label{table:results}
@@ -187,32 +188,32 @@ states for the corridor and drawer tasks.
 \begin{figure*}
   \centering
   \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{gaussianmix/init_state.png}
+    \includegraphics[width=\textwidth]{drawer_images/init_state.png}
     \caption{Objects at ML location}
     \label{fig:step1}
   \end{subfigure}
   \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{gaussianmix/initial_object.png}
+    \includegraphics[width=\textwidth]{drawer_images/initial_object.png}
     \caption{Initial belief state of target object}
     \label{fig:step2}
   \end{subfigure}
   \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{gaussianmix/initial_obstructions.png}
+    \includegraphics[width=\textwidth]{drawer_images/initial_obstructions.png}
     \caption{Initial belief state of obstructions}
     \label{fig:step3}
   \end{subfigure}
   \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{gaussianmix/post_object.png}
+    \includegraphics[width=\textwidth]{drawer_images/post_object.png}
     \caption{Belief state of target after 1 observe}
     \label{fig:step4}
   \end{subfigure}
   \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{gaussianmix/post_obstructions.png}
+    \includegraphics[width=\textwidth]{drawer_images/post_obstructions.png}
     \caption{Belief state of obstructions after 1 observe}
     \label{fig:step5}
   \end{subfigure}
   \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{gaussianmix/true_locs.png}
+    \includegraphics[width=\textwidth]{drawer_images/true_locs.png}
     \caption{True state of all objects}
     \label{fig:step6}
   \end{subfigure}
