@@ -1,4 +1,76 @@
 \section{Experiments}
+%% \begin{figure*}
+%%   \centering
+%%   \begin{subfigure}[b]{0.22\linewidth}
+%%     \includegraphics[width=\textwidth]{corridor_images/0-observe.png}
+%%     \caption{Initial belief state}
+%%     \label{fig:step1}
+%%   \end{subfigure}
+%%   \begin{subfigure}[b]{0.22\linewidth}
+%%     \includegraphics[width=\textwidth]{corridor_images/1-observe.png}
+%%     \caption{After 1 observations}
+%%     \label{fig:step2}
+%%   \end{subfigure}
+%%   \begin{subfigure}[b]{0.22\linewidth}
+%%     \includegraphics[width=\textwidth]{corridor_images/2-observe.png}
+%%     \caption{After 2 observations}
+%%     \label{fig:step3}
+%%   \end{subfigure}
+%%   \begin{subfigure}[b]{0.22\linewidth}
+%%     \includegraphics[width=\textwidth]{corridor_images/3-observe.png}
+%%     \caption{After 3 observations}
+%%     \label{fig:step4}
+%%   \end{subfigure}
+%%   \caption{Execution trace of interfaced belief space planning
+%%     traversing a corridor with uncertain obstacles.
+%%     The blue cylinders are drawn from the uniform belief distribution
+%%     during execution. After reaching the other side of the corridor,
+%%     the robot will pick up two target tables from the three tables.}
+%%   \label{fig:corridorimgs}
+%% \end{figure*}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_0.png}
+    \caption{}
+    \label{fig:step1}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_1.png}
+    \caption{}
+    \label{fig:step2}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_2.png}
+    \caption{}
+    \label{fig:step4}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_negreg.png}
+    \caption{}
+    \label{fig:step5}
+  \end{subfigure}
+  %% \begin{subfigure}[b]{0.3\linewidth}
+  %%   \includegraphics[width=\textwidth]{drawer_images/drawer_dist_3.png}
+  %%   \caption{After observing three drawers (object was seen)}
+  %%   \label{fig:step6}
+  %% \end{subfigure}
+  \caption{Intermediate belief states from a sample execution in our
+    drawer search domain. We search for an object with a multimodel
+    Gaussian distribution over location. We illustrate beliefs with
+    samples from the posterior distribution and show likelihoods with
+    the transperancy of objects. In this case, the object was in the
+    leftmost drawer, and was found after searching the other
+    drawers. (a) shows the initial state and (b) and (c) show
+    intermediate states where we replanned. Notice that we only clear
+    the obstruction in front of the drawer when the belief is
+    concentrated at the back of the drawer. (d) shows the view cones
+    we generated during planning from negative observations.}
+  \label{fig:drawerimgs}
+\end{figure}
+
+
 We evaluate \ibsp{} in partially observable pick-and-place and navigation tasks.
 The robot in our simulation is a full model of the Willow Garage PR2. We
 provide results for several belief distributions: unimodal Gaussian, multimodal
@@ -10,7 +82,8 @@ essentially follows the dynamics specified in
 partial observability, we add the following fluents and operators:
 \begin{tightlist}
   \item[]Fluents: \\\emph{MLInView}(r\_pose, o\_pose\_bel)\\
-    \emph{MLOccludes}(obj, o\_pose\_bel, r\_obj\_pose)\\
+    \emph{MLOccludes}(obj, o\_pose\_bel, r\_obs\_pose)\\
+    \emph{MLObstructs}(obj, traj)\\
     \emph{UncertainGP}(o\_pose\_bel, r\_pose, grasp)\\
     \emph{UncertainObstructs}(obj, traj)
   \item[]Operators: \\\emph{ObserveGP}(r\_obs\_pose, o, o\_pose\_bel)
@@ -26,7 +99,8 @@ partial observability, we add the following fluents and operators:
 \begin{tightlist}
   \item[\emph{pre}:] \emph{MLRLoc}(r\_obs\_pose) \\$\wedge$
     \emph{MLInView}(r\_obs\_pose, traj)\\ $\wedge$
-    $\forall o_i \lnot$\emph{MLOccludes}($o_i$, traj, r\_obs\_pose)
+    $\forall o_i \lnot$\emph{MLOccludes}($o_i$, traj, r\_obs\_pose)\\ $\wedge$
+    $\forall o_i \lnot$\emph{MLObstructs}(obj, traj)\\
   \item[\emph{eff}:] $\forall o_i \lnot$\emph{UncertainObstructs}($o_i$,
     traj)
 \end{tightlist}
@@ -34,12 +108,14 @@ partial observability, we add the following fluents and operators:
 
 The additional skolem functions needed to support this functionality
 are \emph{ViewPose}(Obj) and \emph{ViewPose}(Traj) for each object and
-trajectory in our skolemized representation. The generator for object
-view poses draws samples from a 1-meter unit disc around the
-object, and the head pose is fixed to point at the object's maximum
-likelihood position. The generator for trajectory view poses returns
-the first step along the trajectory that has non-negligible probability of being
-in collision. To observe the uncertain step, a viable base pose is sampled from regions with negligible collision probability along the same trajectory.
+trajectory reference. The generator for object view poses draws
+samples from a 1-meter unit disc around the object, and the head pose
+is fixed to point at the object's maximum likelihood position. The
+generator for trajectory view poses returns the first step along the
+trajectory that has non-negligible probability of being in
+collision. To observe the uncertain step, a viable base pose is
+sampled from regions with negligible collision probability along the
+same trajectory.
 
 \subsection{Observation model and state estimation for the PR2}
 We model observations with ray casting from a simulated head-mounted
@@ -55,15 +131,20 @@ updates. Without these negative observations, it is impossible to determine
 if a trajectory is clear without observing actual objects
 locations. 
 
-We account for negative observations with a factored representation for
-the belief state. In one component, we maintain a distribution that
-accounts for positive observations (e.g., a Kalman filter). The other component is an explicit
-representation of the view cones associated with negative
-observations. We refer to the first component as the positive
-observation distribution and the second as the negative regions. To
-sample from this distribution, we perform probabilistic rejection sampling: sample from the positive observation distribution and then discard
-the sample in inverse proportion to the probability that it lies in a
-negative observation region. The inverse probability is given by $\max(1,\dfrac{\text{penetration depth}}{\text{object radius}})$, where penetration depth is defined as the minimum translation that takes two objects out of collision and object radius is found by approximating the object as a sphere.
+We account for negative observations with a factored representation
+for the belief state. In one component, we maintain a distribution
+that accounts for positive observations (e.g., a Kalman filter). The
+other component is an explicit representation of the view cones
+associated with negative observations. We refer to the first component
+as the positive observation distribution and the second as the
+negative regions. To sample from this distribution, we perform
+probabilistic rejection sampling: sample from the positive observation
+distribution and then discard the sample in inverse proportion to the
+probability that it lies in a negative observation region. The inverse
+probability is given by $\max(1,\dfrac{\text{penetration
+    depth}}{\text{object radius}})$, where penetration depth is the
+minimum translation that takes two objects out of collision and object
+radius is found by approximating the object as a sphere.
 
 
 \subsection{Evaluations}
@@ -147,67 +228,3 @@ states for the corridor and drawer tasks. The included video demonstrates plan e
 
 
 
-\begin{figure*}
-  \centering
-  \begin{subfigure}[b]{0.22\linewidth}
-    \includegraphics[width=\textwidth]{corridor_images/0-observe.png}
-    \caption{Initial belief state}
-    \label{fig:step1}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.22\linewidth}
-    \includegraphics[width=\textwidth]{corridor_images/1-observe.png}
-    \caption{After 1 observations}
-    \label{fig:step2}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.22\linewidth}
-    \includegraphics[width=\textwidth]{corridor_images/2-observe.png}
-    \caption{After 2 observations}
-    \label{fig:step3}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.22\linewidth}
-    \includegraphics[width=\textwidth]{corridor_images/3-observe.png}
-    \caption{After 3 observations}
-    \label{fig:step4}
-  \end{subfigure}
-  \caption{Execution trace of interfaced belief space planning
-    traversing a corridor with uncertain obstacles.
-    The blue cylinders are drawn from the uniform belief distribution
-    during execution. After reaching the other side of the corridor,
-    the robot will pick up two target tables from the three tables.}
-  \label{fig:corridorimgs}
-\end{figure*}
-
-\begin{figure*}
-  \centering
-  \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_0.png}
-    \caption{Initial distribution}
-    \label{fig:step1}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_1.png}
-    \caption{After observing one drawer}
-    \label{fig:step2}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_2.png}
-    \caption{After observing two drawers}
-    \label{fig:step4}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_negreg.png}
-    \caption{Negative regions}
-    \label{fig:step5}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.3\linewidth}
-    \includegraphics[width=\textwidth]{drawer_images/drawer_dist_3.png}
-    \caption{After observing three drawers (object was seen)}
-    \label{fig:step6}
-  \end{subfigure}
-  \caption{Observations for a belief space execution
-    in our drawer search domain with a multimodal Gaussian distribution.
-    In this environment, the robot observes the current maximum likelihood location
-    of the object, which is updated through positive and negative observations. The object's
-    true location is inside the last drawer checked by the robot.}
-  \label{fig:drawerimgs}
-\end{figure*}

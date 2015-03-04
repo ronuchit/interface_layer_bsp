@@ -44,33 +44,32 @@ state-action spaces for task and motion planning. This suggests a
 strategy that applies similar abstraction techniques to belief state
 representations of a planning problem.
 
-Another important development is that of \emph{maximum
-likelihood determinizations} (\mld) of
-POMDPs~\cite{platt2010belief}. This approximation assumes that each
-belief state produces its maximum likelihood observation. The result
-is a deterministic problem that encourages reasonable information-gathering
-behavior. It is amenable to suitably modified standard
-methods; these methods typically prescribe solving a complex,
-continuous, under-actuated problem. However, integration with task
-planners provides relief from this problem---high level tasks can
-split a low-level problem into an observe phase and a motion phase
-(which is the output of joint solution methods in many scenarios).
+Another important development is that of \emph{maximum likelihood
+  determinizations} (\mld) of POMDPs~\cite{platt2010belief}. This
+approximation assumes that each belief state produces its maximum
+likelihood observation. The result is a deterministic problem that
+encourages reasonable information-gathering behavior. It is amenable
+to suitably modified standard methods; these methods typically
+prescribe solving a complex, continuous, under-actuated
+problem. Integration with task planners provides relief from this
+problem---high level tasks often decompose a problem so that
+observation planning and motion planning are seperate.
 
 We present an algorithm, Interfaced Belief Space Planning (\ibsp),
-that leverages these insights. It extends the domain abstraction techniques from
-Srivastava et al.~\cite{srivastava2014combined} to \mld{} formulations of large continuous
-POMDPs. We leverage properties of an \mld{} to construct a simple high-level
-representation of belief states so that (optimistic) belief
-state dynamics are compactly represented. The algorithm alternates
-among extracting a plan skeleton, assigning values to continuous
-variables, and updating the high level with failure information if a
-refinement can not be found.
+that leverages these insights. It extends the domain abstraction
+techniques from Srivastava et al.~\cite{srivastava2014combined} to
+\mld{} formulations of large continuous POMDPs. We leverage properties
+of an \mld{} to construct a simple high-level representation of belief
+states so that (optimistic) belief state dynamics are compactly
+represented. The algorithm alternates among extracting a plan
+skeleton, assigning values to continuous variables, and updating the
+high level with failure information if a refinement can not be found.
 \ibsp{} enforces a clear separation among extracting plan skeletons
 from a domain description, refining a plan skeleton, and determining
 success or failure of a plan; furthermore, each component relies on
 standard operations. Our implementation uses off-the-shelf classical
 planners to generate plan skeletons and sampling and trajectory
-optimization to generate refinements. 
+optimization to generate refinements.
 
 Our refinement strategy only requires the ability to compute maximum
 likelihood observations for a belief state and the ability to filter

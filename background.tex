@@ -49,54 +49,12 @@ a specification for our pick and place task:
 \end{tightlist}
 \end{tightlist}
 \subsection{Abstraction of continuous variables}
-While the above representation is useful for unambiguously specifying
-problems, the presence of continuous parameters and quantifiers over
-parameters prevents directly passing this representation to a
-classical planner. We will need to compile our specification into a
-discrete problem classical planners can readily solve.
-
-We achieve this through the abstraction of continuous aspects of our
-state in the style of Srivastava et
-al.~\cite{srivastava2014combined}. The key step in this approach
-replaces continuous variables by a discrete set of references to useful
-potential values. These references are included as objects in
-the domain description with appropriate facts for the symbolic planner
-to interpret them.
-
-For example, in order to derive an abstract representation of the pick
-operation for object $o_i$, we need a reference to the pose of the
-object and the grasp we will use to pick it. We represent these as
-functions: \emph{Pose}($o_i$), \emph{Grasp}($o_i$), and
-\emph{GP}($o_i$, \emph{Pose}($o_i$), \emph{Grasp}($o_i$)). The proper
-interpretation for the last of these is `the pose that we will choose
-to grasp $o_i$ from when it is at\ldots'. These are represented to the classical planner
-as standard, discrete objects; we then declare facts about
-these variables that are guaranteed to be true. This process is
-referred to as \emph{skolemization}.
-
-To capture the effects of actions that use these parameters, we use
-\emph{sound} representations: facts which are guaranteed to become
-true are included, but conditional effects are not. These are effects
-that depend on the particular binding of a skolem variable. For
-example, after executing a place action we know that \emph{Loc}($o_i$,
-Pose($o_i$)) will be true, but the particular obstructions introduced
-will depend on the exact bindings of Pose($o_i$). We include the
-former in our description and rely on an interface layer to discover
-conditional facts as they become relevant and update the high level
-description accordingly. The process of assigning values to the variables
-of a high level plan is called \emph{refinement} of the high level
-plan.
-
-\algoref{alg-ifop} shows pseudocode for such an interface layer. Lines
-1-5 set up our planning problem. Line 6 constructs a high level
-plan. Lines 8-10 attempt to find a motion plan for the high level
-plan. If refinement fails, we identify a fact that was missing from
-the high level plan that may have caused failure, and the high level then
-replans from that step. This provides a random trajectory (as the
-refinement step is randomized) through the solution space. If we cannot
-find a solution, we reset random seeds and replan from the initial
-state. This integration is complete for a subclass of planning
-problems~\cite{srivastava2014combined}.
+While this representation unambiguously specifies problems, the
+presence of continuous parameters and conditional effects that depend
+on this parameters (e.g., new obstructions from placing an object)
+prevents directly passing this representation to a classical
+planner. We will need to compile our specification into a discrete
+problem classical planners can readily solve.
 
 \begin{algorithm}
  \caption{An interface for deterministic problems} \label{alg-ifop}
@@ -127,6 +85,50 @@ problems~\cite{srivastava2014combined}.
  \end{algorithmic}
 \end{algorithm}
 
+We achieve this through the abstraction of continuous aspects of our
+state in the style of Srivastava et
+al.~\cite{srivastava2014combined}. The key step in this approach
+replaces continuous variables by a discrete set of references to useful
+potential values. These references are included as objects in
+the domain description with appropriate facts for the symbolic planner
+to interpret them.
+
+For example, in order to derive an abstract representation of the pick
+operation for object $o_i$, we need a reference to the pose of the
+object and the grasp we will use to pick it. We represent these as
+functions: \emph{Pose}($o_i$), \emph{Grasp}($o_i$), and
+\emph{GP}($o_i$, \emph{Pose}($o_i$), \emph{Grasp}($o_i$)). The proper
+interpretation for the last of these is `the pose that we will choose
+to grasp $o_i$ from when it is at\ldots'. These are represented to the
+classical planner as standard, discrete objects; we then declare facts
+about these variables that are guaranteed to be true. This process is
+referred to as \emph{skolemization}.
+
+To capture the effects of actions that use these parameters, we use
+\emph{sound} representations: facts which are guaranteed to become
+true are included, but conditional effects are not. These are effects
+that depend on the particular binding of a skolem variable. For
+example, after executing a place action we know that \emph{Loc}($o_i$,
+Pose($o_i$)) will be true, but the particular obstructions introduced
+will depend on the exact bindings of Pose($o_i$). We include the
+former in our description and rely on an interface layer to discover
+conditional facts as they become relevant and update the high level
+description accordingly. The process of assigning values to the variables
+of a high level plan is called \emph{refinement} of the high level
+plan.
+
+\algoref{alg-ifop} shows pseudocode for such an interface layer. Lines
+1-5 set up our planning problem. Line 6 constructs a high level
+plan. Lines 8-10 attempt to find a motion plan for the high level
+plan. If refinement fails, we identify a fact that was missing from
+the high level plan that may have caused failure, and the high level then
+replans from that step. This provides a random trajectory (as the
+refinement step is randomized) through the solution space. If we cannot
+find a solution, we reset random seeds and replan from the initial
+state. This integration is complete for a subclass of planning
+problems~\cite{srivastava2014combined}.
+
+
 
 \subsection{Assumed maximum likelihood determinization}
 In this paper, we consider problems from a more general class than is
@@ -145,15 +147,16 @@ probability distribution over states, to actions.
 The central idea behind the \mld{} is that, if we fix the observation
 for each state, the Bayesian updates to our belief are
 deterministic. For example, in the Gaussian case, belief dynamics are
-defined by the Kalman filter update equations, and fixing the observation
-for each state reduces this to a deterministic update. While there are many
-determinizations of belief space problems, the benefit of the \mld{}
-is that it is a deterministic problem that still generates information-seeking behavior.
+defined by the Kalman filter update equations, and fixing the
+observation for each state reduces this to a deterministic
+update. While there are many determinizations of belief space
+problems, the benefit of the \mld{} is that it is a deterministic
+problem that still generates information-seeking behavior.
 
-Smaller determinized problems can be solved with LQR approaches or
-direct SQP optimization~\cite{platt2010belief,
-  patil2014scaling}. These solutions are then used in a model
-predictive control paradigm---a trajectory is computed, the first step
-is executed, the true next belief state is observed, and the process
-repeats. Our approach will apply this paradigm to larger plans that
-leverage task and motion planning.
+%% Smaller determinized problems can be solved with LQR approaches or
+%% direct SQP optimization~\cite{platt2010belief,
+%%   patil2014scaling}. These solutions are then used in a model
+%% predictive control paradigm---a trajectory is computed, the first step
+%% is executed, the true next belief state is observed, and the process
+%% repeats. Our approach will apply this paradigm to larger plans that
+%% leverage task and motion planning.

@@ -93,9 +93,9 @@ known. It is possible to relax this assumption at the cost of
 introducing more complex descriptions. 
 
 Using a full belief representation, we have the following
-description:\\
-\noindent\emph{BPick}(o, o\_pose\_bel, r\_pose, grasp)
+description:
 \begin{tightlist}
+\item[]\emph{BPick}(o, o\_pose\_bel, r\_pose, grasp)
 \item[\emph{pre:}] \emph{BLoc}(o, o\_pose) $\wedge$
   \emph{RLoc}(r\_pose) \\$\wedge$ \emph{BGraspPose}(o, o\_pose\_bel,
   r\_pose, grasp) \\$\wedge$ \emph{Holding}(Null, Null)
@@ -105,26 +105,23 @@ description:\\
   $\lnot$\emph{BObstructs}(o, t, h, g)\\$\wedge$ $\forall$ o\_p,
   r\_p $\lnot$\emph{BOccludes}(o, o\_p, r\_p)
 \end{tightlist}
-\emph{BGraspPose} characterizes distributions over the location of o such
-that the probability with which a grasp succeeds is higher than some safety
-margin. The standard approach to handling this in an interface layer would
-be to detect that it did not hold and propagate that fact to the high level planner.
-The challenge, however, is that it is hard to write down preconditions to change
-this fluent's value. In particular, we do not know if an observation
-operator or an action operator will help us correct a low level
-failure.
+\emph{BGraspPose} characterizes distributions over the location of o
+such that the probability with which a grasp succeeds is higher than
+some safety margin. The issue is that this is only a conditional
+effect of observation actions, so a sound representation can never
+plan to make this true.  
 
 To rectify this issue we use the following property about an \mld{}
 representation. If \emph{BGraspPose} is not true, then one of two
 cases will hold: either 1) the maximum likelihood state is not a
 successful grasp pose or 2) the maximum likelihood state admits a
-successful grasp, but the distribution has too much variance to allow a successful
-grasp with high probability. In the first case, we must manipulate the
-state, while in the other we must observe it. To capture this
-difference, we replace belief fluents with maximum likelihood fluents
-and \emph{uncertainty} fluents:\\
-\noindent\emph{MLPick}(o, o\_pose\_bel, r\_pose, grasp)
+successful grasp, but the distribution has too much variance to allow
+a successful grasp with high probability. In the first case, we must
+manipulate the state, while in the other we must observe it. We
+replace belief fluents with maximum likelihood fluents and
+\emph{uncertainty} fluents:
 \begin{tightlist}
+\item[]\emph{MLPick}(o, o\_pose\_bel, r\_pose, grasp)
 \item[\emph{pre:}] \emph{MLLoc}(o, o\_pose\_bel) $\wedge$
   \emph{MLRLoc}(r\_pose\_bel) \\$\wedge$ \emph{MLGraspPose}(o,
   o\_pose\_bel, r\_pose, grasp) \\$\wedge$
