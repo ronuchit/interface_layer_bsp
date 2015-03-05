@@ -1,24 +1,44 @@
 \section{Related Work}
-%% Our work builds on recent results in deterministic task and motion
-%% planning. Early work in task and motion planning was embodied in the
-%% aSyMov system~\cite{gravot2005asymov}, where a task plan was generated
-%% and used to guide motion planning. However, the focus was on
-%% determining a way to solve motion plans in parallel. Dornhege et
-%% al. use semantic attachments to do task and motion planning with
-%% classical planners~\cite{dornhege2012semantic}. This approach makes
-%% use of task planners, but requires representation of discretized
-%% locations within the high level. Havur et al. use local search to find
-%% an optimal geometric configuration before discretizing the continuous
-%% plane into non-uniform cells and using a hybrid planner to find a
-%% feasible motion plan~\cite{havur2014geometric}. Lagriffoul et
-%% al. parameterize symbolic actions with coarse geometric
-%% representations of objects and grasp types. Possible geometric
-%% instances are sampled from the symbolic plan and are pruned by
-%% constraints to reduce geometric
-%% backtracking~\cite{lagriffoul2014orientation}.
+Our work builds on recent results in deterministic task and motion
+planning. Early work in task and motion planning was embodied in the
+aSyMov system~\cite{gravot2005asymov}, where a task plan was generated
+and used to guide motion planning. However, the focus was on
+determining a way to solve motion plans in parallel. Dornhege et
+al. use semantic attachments to do task and motion planning with
+classical planners~\cite{dornhege2012semantic}. This approach makes
+use of task planners, but requires representation of discretized
+locations within the high level. Havur et al. use local search to find
+an optimal geometric configuration before discretizing the continuous
+plane into non-uniform cells and using a hybrid planner to find a
+feasible motion plan~\cite{havur2014geometric}. Lagriffoul et
+al. parameterize symbolic actions with coarse geometric
+representations of objects and grasp types. Possible geometric
+instances are sampled from the symbolic plan and are pruned by
+constraints to reduce geometric
+backtracking~\cite{lagriffoul2014orientation}.
 
-Knowledge space planning representations are one of the oldest ideas
-in AI~\cite{mccarthy1968some}. Bonet and Geffner provide in-depth
+Maximum likelihood determinization was introduced by Platt et
+al.~\cite{platt2010belief}. They used this approach to frame problem
+solving in belief space as an underactuated control problem. They use
+LQR and transcription methods to find trajectories in belief space and
+characterize scenarios where a replanning strategy is guaranteed to
+succeed. Van Den Berg et al. use LQG to solve Gaussian belief space
+planning problems that incorporate collision avoidance
+constraints~\cite{van2012motion}. They are able to plan without
+the maximum likelihood assumption and explore the approximations
+introduced with maximum likelihood determinizations.
+ 
+Our determinization-replan approach shares similarity with
+determinization-replan approaches for probabilistic planning, such as
+FF-replan~\cite{yoon2007ff}. Both leverage determinization in order to
+obtain major performance gains from classical planners. The maximum
+likelihood assumption is similar to the most likely transition
+determinization from that literature, while our optimistic belief
+updates are similar to an all outcomes determinization.
+ 
+The idea of using knowledge space representations is an old idea in
+artificial intelligence that dates back to McCarthy and
+Hayes~\cite{mccarthy1968some}. Bonet and Geffner provide in-depth
 experimentation and analysis of discrete deterministic partially
 observed planning~\cite{bonet2011planning}.  They provide conditions
 under which discrete formulations of partially observable planning
@@ -28,10 +48,10 @@ our completeness theorem; however, our algorithms are aimed at large
 continuous problems for robotics while their work is aimed at
 classical planning.
 
-Our approach relies on the maximum likelihood determinization
-introduced by Platt et al.~\cite{platt2010belief}. They frame problem
-solving in belief space as an underactuated control problem and apply
-continuous techniques. 
+% Our approach relies on the maximum likelihood determinization
+% introduced by Platt et al.~\cite{platt2010belief}. They frame problem
+% solving in belief space as an underactuated control problem and apply
+% continuous techniques. 
 
 The BHPN planning and execution system is a task and motion planning
 approach to handle uncertainty~\cite{kaelbling2013integrated}. Similar
