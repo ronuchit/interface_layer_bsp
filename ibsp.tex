@@ -219,7 +219,7 @@ are satisfied. We assume that preconditions are defined by a function
 that will return true or false indicating whether the precondition holds or not,
 given a state of the world. We determine
 that each of these is satisfied with probability greater than
-$\epsilon$ by Monte Carlo sampling from the belief
+$1-\epsilon$ by Monte Carlo sampling from the belief
 state. $N_{samples}$ determines the fidelity of this sampling.
 
 When we detect failure for a belief fluent, we must decide which type
@@ -242,7 +242,7 @@ illustrates these ideas.
           \State preds $\leftarrow $ ExtractPreconds($p_i, R_i$)
           \State W $\leftarrow$ Sample(B, $N_{samples}$)
           \For{pred $\in$ preds}
-              \If{ PercentSucceeds(pred, W) $< \epsilon$}
+              \If{ PercentSucceeds(pred, W) $< 1-\epsilon$}
                  \If {$\lnot$pred.eval(B.ML) or IsObs(pred)}
                      \State \Return (False, i, $\lnot$ML(pred))
                  \Else
