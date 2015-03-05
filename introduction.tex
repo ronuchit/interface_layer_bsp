@@ -11,10 +11,9 @@ can require long, temporally extended plans.
     % \includegraphics[width=0.45\textwidth]{corridor_images/obj_at_true_loc.png}
     \includegraphics[trim = 160mm 90mm 0mm 90mm, clip, width=0.85\textwidth]{corridor_images/corridor_path_2.png}
   \caption{A screenshot from one of our experiments. The robot is
-    tasked with navigating to the other side of the corridor, but
-    there is a uniform distribution of obstacles in the way. Our low
+    tasked with navigating to the other side of the corridor through a uniform distribution over obstacles. Our low
     level refinement algorithm detects the probability of obstruction and
-    propagates information to the high level. The objects shown are
+    propagates this information to the high level. The objects shown are
     from the posterior distribution after several negative
     observations.}
   \label{fig:knot_steps}
@@ -22,7 +21,7 @@ can require long, temporally extended plans.
 
 
 Discovering a solution to this task necessitates finding a policy that
-accounts for uncertainty in locations of objects, uncertainty in robot location,
+accounts for uncertainty in locations of objects, uncertainty in robot position,
 and non-determinism in the dynamics (among other
 challenges). Solving such problems exactly is far beyond the state of
 the art in partially observable Markov decision processes.
@@ -34,7 +33,7 @@ own right, but careful applications of abstraction, lazy
 discretization, and motion planning have made inroads on this
 problem~\cite{srivastava2014combined, lozano2014constraint}. These
 approaches plan in an \emph{abstract} representation of a problem
-(without continuous variables) and use sampling and motion planning to
+(without continuous variables) then use sampling and motion planning to
 \emph{refine} abstract plans into fully grounded plans involving continuous
 operators.
 
@@ -59,16 +58,15 @@ We present an algorithm, Interfaced Belief Space Planning (\ibsp),
 that leverages these insights. It extends the domain abstraction
 techniques from Srivastava et al.~\cite{srivastava2014combined} to
 \mld{} formulations of large continuous POMDPs. We leverage properties
-of an \mld{} to construct a simple high-level representation of belief
-states so that (optimistic) belief state dynamics are compactly
-represented. The algorithm alternates among extracting a plan
+of the \mld{} to construct a simple high-level representation of belief
+states in order to compactly represent (optimistic) belief state dynamics. The algorithm alternates among extracting a plan
 skeleton, assigning values to continuous variables, and updating the
-high level with failure information if a refinement cannot be found.
+high level with failure information when a refinement cannot be found.
 \ibsp{} enforces a clear separation among extracting plan skeletons
 from a domain description, refining a plan skeleton, and determining
 success or failure of a plan; furthermore, each component relies on
 standard operations. Our implementation uses off-the-shelf classical
-planners to generate plan skeletons and sampling and trajectory
+planners to generate plan skeletons along with sampling and trajectory
 optimization to generate refinements.
 
 Our refinement strategy only requires the ability to compute maximum

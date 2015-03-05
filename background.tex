@@ -19,8 +19,8 @@ Formally, we define a (fully observed) planning problem, $\Pi$ as a tuple, $\Pi 
 \end{tightlist}
 A solution to $\Pi$ is a sequence of operators and states, $\{(op_1,
 s_1),\ldots,(op_N, s_N)\}$, such that preconditions are satisfied and
-the goal is achieved. That is, $s_i~=~apply(eff(op_i),~s_{i-1});
-pre(op_i)~\in~s_{i-1},$ $pre(op_0)~\in~I; s_N~\in~G$. We now give
+the goal is achieved. That is, $s_i~=~apply(eff(op_i),~s_{i-1});~
+pre(op_i)~\in~s_{i-1},$ $pre(op_0)~\in~I;~s_N~\in~G$. We now give
 a specification for our pick and place task:
 \begin{tightlist}
 \item[$\E$] objects ($o_i$, represented as strings), Null (a
@@ -39,7 +39,7 @@ a specification for our pick and place task:
 \item \emph{Pick}(obj, obj\_pose, r\_pose, grasp)
 \begin{tightlist}
    \item[\emph{pre}:] \emph{RLoc}(r\_pose) $\wedge$ \emph{Holding}(Null, Null) \\$\wedge$ \emph{GraspPose}(obj,~obj\_pose, r\_pose, grasp) \\$\wedge$ \emph{Loc}(obj, obj\_pose)
-   \item[\emph{eff}:] \emph{Holding}(obj, grasp) $\wedge$ $\lnot$\emph{Loc}(obj, obj\_pose) \\$\wedge$ $\lnot$\emph{Holding}(Null, Null) $\wedge$ $\forall$t $\lnot$\emph{Obstructs}(obj, t)
+   \item[\emph{eff}:] \emph{Holding}(obj, grasp) $\wedge$ $\lnot$\emph{Loc}(obj, obj\_pose) \\$\wedge$ $\lnot$\emph{Holding}(Null, Null) \\$\wedge$ $\forall$t $\lnot$\emph{Obstructs}(obj, t)
 \end{tightlist}
 \item \emph{Place}(obj, obj\_pose, r\_pose, grasp)
 \begin{tightlist}

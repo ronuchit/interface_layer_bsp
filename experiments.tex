@@ -57,13 +57,13 @@
   %%   \label{fig:step6}
   %% \end{subfigure}
   \caption{Intermediate belief states from a sample execution in our
-    drawer search domain. We search for an object with a multimodel
+    drawer search domain. We search for an object with a multimodal
     Gaussian distribution over three drawers. We illustrate beliefs with
     samples from the posterior distribution and show likelihoods with
     the transparency of objects. In this case, the object was in the
-    leftmost drawer, and it was found after searching the other
-    drawers. (a) shows the initial state and (b) and (c) show
-    intermediate states where we replanned. Notice that we only clear
+    leftmost drawer, and was found after searching the other
+    drawers because they had a higher likelihood of containing the object. (a) shows the initial state and (b) and (c) show
+    intermediate states at which we had to replan. Notice that we only clear
     the obstruction in front of the drawer when it is close enough to hinder sufficient opening.
     (d) shows the view cones from negative observations that were generated during planning.}
   \label{fig:drawerimgs}
@@ -142,7 +142,7 @@ distribution and then discard the sample in inverse proportion to the
 probability that it lies in a negative region. The inverse
 probability is given by $\max(1,\dfrac{\text{penetration
     depth}}{\text{object radius}})$, where penetration depth is the
-minimum translation that takes two objects out of collision and object
+minimum translation distance that takes two objects out of collision and object
 radius is found by approximating the object as a sphere.
 
 
