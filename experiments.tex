@@ -1,34 +1,4 @@
 \section{Experiments}
-%% \begin{figure*}
-%%   \centering
-%%   \begin{subfigure}[b]{0.22\linewidth}
-%%     \includegraphics[width=\textwidth]{corridor_images/0-observe.png}
-%%     \caption{Initial belief state}
-%%     \label{fig:step1}
-%%   \end{subfigure}
-%%   \begin{subfigure}[b]{0.22\linewidth}
-%%     \includegraphics[width=\textwidth]{corridor_images/1-observe.png}
-%%     \caption{After 1 observations}
-%%     \label{fig:step2}
-%%   \end{subfigure}
-%%   \begin{subfigure}[b]{0.22\linewidth}
-%%     \includegraphics[width=\textwidth]{corridor_images/2-observe.png}
-%%     \caption{After 2 observations}
-%%     \label{fig:step3}
-%%   \end{subfigure}
-%%   \begin{subfigure}[b]{0.22\linewidth}
-%%     \includegraphics[width=\textwidth]{corridor_images/3-observe.png}
-%%     \caption{After 3 observations}
-%%     \label{fig:step4}
-%%   \end{subfigure}
-%%   \caption{Execution trace of interfaced belief space planning
-%%     traversing a corridor with uncertain obstacles.
-%%     The blue cylinders are drawn from the uniform belief distribution
-%%     during execution. After reaching the other side of the corridor,
-%%     the robot will pick up two target tables from the three tables.}
-%%   \label{fig:corridorimgs}
-%% \end{figure*}
-
 \begin{figure}
   \centering
   \begin{subfigure}[b]{0.48\linewidth}
@@ -69,6 +39,35 @@
   \label{fig:drawerimgs}
 \end{figure}
 
+\begin{figure*}
+  \centering
+  \begin{subfigure}[b]{0.22\linewidth}
+    \includegraphics[width=\textwidth]{corridor_images/0-observe.png}
+    \caption{Initial belief state}
+    \label{fig:step1}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.22\linewidth}
+    \includegraphics[width=\textwidth]{corridor_images/1-observe.png}
+    \caption{After 1 observations}
+    \label{fig:step2}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.22\linewidth}
+    \includegraphics[width=\textwidth]{corridor_images/2-observe.png}
+    \caption{After 2 observations}
+    \label{fig:step3}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.22\linewidth}
+    \includegraphics[width=\textwidth]{corridor_images/3-observe.png}
+    \caption{After 3 observations}
+    \label{fig:step4}
+  \end{subfigure}
+  \caption{Execution trace of interfaced belief space planning
+    traversing a corridor with uncertain obstacles.
+    The blue cylinders are drawn from the uniform belief distribution
+    during execution. After reaching the other side of the corridor,
+    the robot will pick up two target tables from the three tables.}
+  \label{fig:corridorimgs}
+\end{figure*}
 
 We evaluate \ibsp{} in partially observable pick-and-place and navigation tasks.
 The robot in our simulation is a full model of the Willow Garage PR2. We
@@ -184,8 +183,8 @@ chooses to refine the plan if the object was not actually seen (indicating that 
 The new refinement incorporates this negative observation, and the system may then try opening another drawer.
 
 Table \ref{table:results} shows timing results for the three described
-tasks. \figref{fig:drawerimgs} shows intermediate steps and belief
-states for the drawer task. The included video demonstrates plan execution for all three tasks.
+tasks. \figref{fig:drawerimgs} and \figref{fig:corridorimgs} show intermediate steps and belief
+states for the drawer and corridor tasks. The included video demonstrates plan execution for all three tasks.
 
 \begin{table}
   \centering
