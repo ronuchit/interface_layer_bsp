@@ -1,3 +1,24 @@
+@article{cortes1995support,
+  title={Support-vector networks},
+  author={Cortes, Corinna and Vapnik, Vladimir},
+  journal={Machine learning},
+  volume={20},
+  number={3},
+  pages={273--297},
+  year={1995},
+  publisher={Springer}
+}
+
+
+@article{farahmand2013classification,
+  title={Classification-based Approximate Policy Iteration},
+  author={Farahmand, Amir-massoud and Precup, Doina and Ghavamzadeh, Mohammad and Barreto, Andr{\'e} MS},
+  journal={IEEE Transactions on Automatic Control (To be submitted)},
+  volume={2},
+  year={2013}
+}
+
+
 @inproceedings{chapelle2011empirical,
   title={An empirical evaluation of thompson sampling},
   author={Chapelle, Olivier and Li, Lihong},
@@ -876,6 +897,15 @@ xxISSN={1552-3098}
   publisher={JSTOR}
 }
 
+@inproceedings{li2011unbiased,
+  title={Unbiased offline evaluation of contextual-bandit-based news article recommendation algorithms},
+  author={Li, Lihong and Chu, Wei and Langford, John and Wang, Xuanhui},
+  booktitle={Proceedings of the fourth ACM international conference on Web search and data mining},
+  pages={297--306},
+  year={2011},
+  organization={ACM}
+}
+
 @inproceedings{chapelle2011empirical,
   title={An empirical evaluation of thompson sampling},
   author={Chapelle, Olivier and Li, Lihong},
@@ -923,6 +953,14 @@ xxISSN={1552-3098}
   pages={285--294},
   year={1933},
   publisher={JSTOR}
+}
+
+@article{guez2013scalable,
+  title={Scalable and efficient Bayes-adaptive reinforcement learning based on Monte-Carlo tree search},
+  author={Guez, Arthur and Silver, David and Dayan, Peter},
+  journal={Journal of Artificial Intelligence Research},
+  pages={841--883},
+  year={2013}
 }
 
 @article{gittins1979bandit,
@@ -974,7 +1012,7 @@ xxISSN={1552-3098}
 @inproceedings{kaelbling2011hierarchical,
   title={Hierarchical task and motion planning in the now},
   author={Kaelbling, Leslie Pack and Lozano-P{\'e}rez, Tom{\'a}s},
-  booktitle={Robotics and Automation (ICRA), 2011 IEEE International Conference on},
+  booktitle={2011 IEEE International Conference on Robotics and Automation (ICRA)},
   pages={1470--1477},
   year={2011},
   organization={IEEE}
@@ -1327,4 +1365,25 @@ year = "2008"
   author={Srivastava, Siddharth and Russell, Stuart and Ruan, Paul and Cheng, Xiang},
   journal={Proc. UAI-14},
   year={2014}
+}
+
+@article{havur2014geometric,
+  title={Geometric Rearrangement of Multiple Movable Objects on Cluttered Surfaces: A Hybrid Reasoning Approach},
+  author={Giray Havur and Guchan Ozbilgin and Esra Erdem and Volkan Patoglu},
+  booktitle = {Proceedings of the International Conference on Robotics and Automation (ICRA)},
+  year = {2014}
+}
+
+@article{lagriffoul2014orientation,
+  title={Efficiently combining task and motion planning using geometric constraints},
+  author={Fabien Lagriffoul and Dimitar Dimitrov and Julien Bidot and Alessandro Saffiotti and Lars Karlsson},
+  booktitle = {Proceedings of the International Conference on Robotics and Automation (ICRA)},
+  year={2014}
+}
+
+@article{jia2014fcl,
+  title={FCL: A General Purpose Library for Collision and Proximity Queries},
+  author={Jia Pan and Sachin Chitta and Dinesh Manocha},
+  booktitle = {Proceedings of the International Conference on Robotics and Automation (ICRA)},
+  year={2012}
 }

@@ -1,16 +1,20 @@
 %% \usepackage[numbers]{natbib}
 \usepackage{multicol}
-%% \usepackage[bookmarks=true]{hyperref}
+\usepackage[bookmarks=true]{hyperref}
 \usepackage{color}
-\usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsmath}
-\usepackage{amsthm}
+
+%% \usepackage{amsthm}
 \usepackage{booktabs}
 \usepackage{graphicx}
 
-%% \usepackage{algorithm}
-%% \usepackage{algpseudocode}
+\usepackage{caption}
+\usepackage{subcaption}
+%%\usepackage{subfigure}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 
 \DeclareMathOperator*{\argmin}{argmin}
