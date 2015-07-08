@@ -27,9 +27,9 @@ a specification for our pick and place task:
   nonexistent object), object poses (continuous 6DOF), robot poses
   (continuous 20DOF), robot trajectories (continuous $20\cdot~T_{max}$ dimensional),
   and grasps (continuous 6DOF).
-\item[$\F$] \emph{Loc}(obj,~obj\_pose), \emph{RLoc}(robot\_pose),
+\item[$\F$] \emph{Loc}(obj,~obj\_pose), \emph{RLoc}(r\_pose),
   \\\emph{Obstructs}(obj,~traj), \emph{Holding}(obj,~grasp),
-  \\\emph{Connects}(rob\_pose1,~rob\_pose2,~traj),
+  \\\emph{Connects}(r\_pose1,~r\_pose2,~traj),
   \\\emph{GraspPose}(obj,~obj\_pose,~r\_pose,~grasp).
 \item[$\Ops$] \begin{tightlist} \item \emph{MoveTo}(r\_pose1,~r\_pose2, traj)
 \begin{tightlist}

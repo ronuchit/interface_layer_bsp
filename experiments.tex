@@ -84,7 +84,8 @@ partial observability, we add the following fluents and operators:
     \emph{MLObstructs}(obj, traj)\\
     \emph{UncertainGP}(o\_pose\_bel, r\_pose, grasp)\\
     \emph{UncertainObstructs}(obj, traj)
-  \item[]Operators: \\\emph{ObserveGP}(r\_obs\_pose, o, o\_pose\_bel)
+  \item[]Operators:
+  \begin{tightlist} \item \emph{ObserveGP}(r\_obs\_pose, o, o\_pose\_bel)
 \begin{tightlist}
   \item[\emph{pre}:] \emph{MLLoc}(o, o\_pose\_bel) $\wedge$
     \emph{MLRLoc}(r\_obs\_pose) \\$\wedge$ $\forall o_i
@@ -92,15 +93,16 @@ partial observability, we add the following fluents and operators:
     \emph{MLInView}(r\_obs\_pose, o\_pose)
   \item[\emph{eff}:] $\forall$ r\_p, g $\lnot$\emph{UncertainGP}(o\_pose\_bel, r\_p, g)
 \end{tightlist}
-\emph{ObserveTrajectory}(r\_obs\_pose, traj) 
+\item  \emph{ObserveTrajectory}(r\_obs\_pose, traj) 
 
 \begin{tightlist}
   \item[\emph{pre}:] \emph{MLRLoc}(r\_obs\_pose) \\$\wedge$
     \emph{MLInView}(r\_obs\_pose, traj)\\ $\wedge$
     $\forall o_i \lnot$\emph{MLOccludes}($o_i$, traj, r\_obs\_pose)\\ $\wedge$
-    $\forall o_i \lnot$\emph{MLObstructs}(obj, traj)\\
+    $\forall o_i \lnot$\emph{MLObstructs}(obj, traj)
   \item[\emph{eff}:] $\forall o_i \lnot$\emph{UncertainObstructs}($o_i$,
     traj)
+\end{tightlist}
 \end{tightlist}
 \end{tightlist}
 
@@ -185,6 +187,7 @@ The new refinement incorporates this negative observation, and the system may th
 Table \ref{table:results} shows timing results for the three described
 tasks. \figref{fig:drawerimgs} and \figref{fig:corridorimgs} show intermediate steps and belief
 states for the drawer and corridor tasks. The included video demonstrates plan execution for all three tasks.
+
 
 \begin{table}
   \centering

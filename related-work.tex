@@ -53,21 +53,21 @@ classical planning.
 % solving in belief space as an underactuated control problem and apply
 % continuous techniques. 
 
-The BHPN planning and execution system is a task and motion planning
+The Belief Space Hierarchical Planning in the Now (BHPN) planning and execution system is a task and motion planning
 approach to handle uncertainty~\cite{kaelbling2013integrated}. Similar
 to our approach, they construct task plans in belief space under
 maximum likelihood determinization. Levihn et al. extend this system
 to construct shorter plans at execution time by smart replanning and
 reconsideration~\cite{levihn2013foresight}. They explicitly formulate
 the regression of belief goals under Gaussian distributions and plan
-with an exact represention ofe belief state dynamics. In contrast, we
+with an exact representation of belief state dynamics. In contrast, we
 use references to the belief so we can plan with arbitrary belief
 representations, not just Gaussians.
 
-Srivastava et al. formulate open world POMDPs with a probabilistic
+Srivastava et al. formulate open world \pomdp s with a probabilistic
 program~\cite{srivastava2014first} -- they develop a generalization of
 point-based value iteration to that setting. While both our method and
-theirs can been viewed as solving very large POMDPs, their method's size stems from
+theirs can been viewed as solving very large \pomdp s, their method's size stems from
 the (unbounded) size of the world and complexity of corresponding
 beliefs, while ours stems from uncertainty about continuous quantities.
 
