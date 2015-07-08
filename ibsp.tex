@@ -95,7 +95,7 @@ introducing more complex descriptions.
 Using a full belief representation, we have the following
 description:\\
 \emph{BPick}(o, o\_pose\_bel, r\_pose, grasp)
-\vspace{-2pt}
+\vspace{-2mm}
 \begin{tightlist}
 \item[\emph{pre:}] \emph{BLoc}(o, o\_pose\_bel) $\wedge$
   \emph{RLoc}(r\_pose) \\$\wedge$ \emph{BGraspPose}(o, o\_pose\_bel,
@@ -120,7 +120,7 @@ manipulate the state (e.g., move obstructions), while in the other we must obser
 thus replace belief fluents with maximum likelihood fluents and
 \emph{uncertainty} fluents:\\
 \emph{MLPick}(o, o\_pose\_bel, r\_pose, grasp)
-\vspace{-2pt}
+\vspace{-1mm}
 \begin{tightlist}
 \item[\emph{pre:}] \emph{MLLoc}(o, o\_pose\_bel) $\wedge$
   \emph{RLoc}(r\_pose) \\$\wedge$ \emph{MLGraspPose}(o,
@@ -159,10 +159,10 @@ will plan to do them. In the event that our plan was overly optimistic BCheckSuc
 \subsection{The \ibsp{} algorithm}
 \label{sec-ibsp}
 In this section, we detail the necessary changes to the interface from
-Srivastava et al. to handle our belief space formulation. The primary
+Srivastava et al. to handle our belief space formulation. The refinement operator from Srivastava et al. didn't work well with belief states because it would exhaustively search all pose combinations before realizing the true failure was actually from a belief fluent (e.g., UncertainGP). The primary
 change is that the refinement operation must find an assignment of
 continuous variables that maximizes the probability of
-`success.' \algoref{alg-ibsp} shows pseudocode with changes to \algoref{alg-ifop} highlighted in bold.
+`success.' \algoref{alg-ibsp} shows pseudocode with changes to \algoref{alg-ifop} highlighted in red.
 
 \begin{algorithm}
  \caption{The \ibsp{} planning algorithm} \label{alg-ibsp}
@@ -174,14 +174,14 @@ continuous variables that maximizes the probability of
   \State $p_{pre} \leftarrow None$
   \State $R_{pre} \leftarrow None$
   \While {not resource limit reached} 
-     \State $R_{post} \leftarrow $ \textbf{MLRefine}$(B, p_{post})$
-     \State $is\_fail,i_{fail}, failure$\\\ \ \ \ \ \ \ \ \ \ $\leftarrow $ \textbf{BCheckSuccess}$(B, (p_{post}, R_{post}), \epsilon)$
+     \State $R_{post} \leftarrow $ \textcolor{red}{MLRefine}$(B, p_{post})$
+     \State $is\_fail,i_{fail}, failure$\\\ \ \ \ \ \ \ \ \ \ $\leftarrow $ \textcolor{red}{BCheckSuccess}$(B, (p_{post}, R_{post}), \epsilon)$
      \If {$\lnot is\_fail$}
          \State \Return $(p_{pre} + p_{post}, R_{pre} + R_{post})$
      \EndIf
      \State $p_{pre} \leftarrow p_{pre} + p_{post}[:i_{fail}]$
      \State $R_{pre} \leftarrow R_{pre} + R[:i_{fail}]$
-     \State $B \leftarrow MLFilter(B_0, p_{pre}, R_{pre})$
+     \State $B \leftarrow $ \textcolor{red}{MLFilter} $(B, p_{pre}, R_{pre})$
      \State $b\leftarrow $ ExtractFailureSymbols$(B, failure)$
      \State $p_{post} \leftarrow $ Plan$(b, \gamma)$     
      \If {max attempts reached}
@@ -221,6 +221,8 @@ given a state of the world. We determine
 that each of these is satisfied with probability greater than
 $1-\epsilon$ by Monte Carlo sampling from the belief
 state. $N_{samples}$ determines the fidelity of this sampling.
+
+The third change is the addition of \emph{MLFilter} which updates the belief state based on the maximum likelihood observations that occurred.
 
 When we detect failure for a belief fluent, we must decide which type
 of failure information to propagate to the high level. We do this by

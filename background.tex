@@ -31,12 +31,7 @@ a specification for our pick and place task:
   \\\emph{Obstructs}(obj,~traj), \emph{Holding}(obj,~grasp),
   \\\emph{Connects}(r\_pose1,~r\_pose2,~traj),
   \\\emph{GraspPose}(obj,~obj\_pose,~r\_pose,~grasp).
-\item[$\Ops$] \begin{tightlist} \item \emph{MoveTo}(r\_pose1,~r\_pose2, traj)
-\begin{tightlist}
-   \item[\emph{pre}:] \emph{RLoc}(r\_pose1) \\$\wedge$ \emph{Connects}(r\_pose1,~r\_pose2,~traj) \\$\wedge$ $\forall i \lnot Obstructs(o_i,~traj)$
-   \item[\emph{eff}:] \emph{RLoc}(r\_pose2) $\wedge$ $\lnot$\emph{RLoc}(r\_pose1)
-\end{tightlist}
-\item \emph{Pick}(obj, obj\_pose, r\_pose, grasp)
+\item[$\Ops$] \begin{tightlist} \item \emph{Pick}(obj, obj\_pose, r\_pose, grasp)
 \begin{tightlist}
    \item[\emph{pre}:] \emph{RLoc}(r\_pose) $\wedge$ \emph{Holding}(Null, Null) \\$\wedge$ \emph{GraspPose}(obj,~obj\_pose, r\_pose, grasp) \\$\wedge$ \emph{Loc}(obj, obj\_pose)
    \item[\emph{eff}:] \emph{Holding}(obj, grasp) $\wedge$ $\lnot$\emph{Loc}(obj, obj\_pose) \\$\wedge$ $\lnot$\emph{Holding}(Null, Null) \\$\wedge$ $\forall$t $\lnot$\emph{Obstructs}(obj, t)
@@ -72,6 +67,19 @@ classical planner as standard discrete objects; we then declare facts
 about these variables that are guaranteed to be true. This process is
 referred to as \emph{skolemization}.
 
+To capture the effects of actions that use these parameters, we use
+\emph{sound} representations: facts which are guaranteed to become
+true are included, but conditional effects are not. These are effects
+that depend on the particular binding of a skolem variable. For
+example, after executing a place action we know that \emph{Loc}($o_i$,
+ObjPose($o_i$)) will be true, but the particular obstructions introduced
+will depend on the exact bindings of ObjPose($o_i$). We include the
+former in our description and rely on an interface layer to discover
+conditional facts, such as the latter, as they become relevant and update the high level
+description accordingly. The process of assigning values to the variables
+of a high level plan is called \emph{refinement} of the high level
+plan.
+
 \begin{algorithm}
  \caption{An interface for deterministic problems} \label{alg-ifop}
  \begin{algorithmic}[1]
@@ -100,19 +108,6 @@ referred to as \emph{skolemization}.
   \EndProcedure
  \end{algorithmic}
 \end{algorithm}
-
-To capture the effects of actions that use these parameters, we use
-\emph{sound} representations: facts which are guaranteed to become
-true are included, but conditional effects are not. These are effects
-that depend on the particular binding of a skolem variable. For
-example, after executing a place action we know that \emph{Loc}($o_i$,
-ObjPose($o_i$)) will be true, but the particular obstructions introduced
-will depend on the exact bindings of ObjPose($o_i$). We include the
-former in our description and rely on an interface layer to discover
-conditional facts, such as the latter, as they become relevant and update the high level
-description accordingly. The process of assigning values to the variables
-of a high level plan is called \emph{refinement} of the high level
-plan.
 
 \algoref{alg-ifop} shows pseudocode for such an interface layer. Lines
 1-5 set up our planning problem. Line 6 constructs a high level
