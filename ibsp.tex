@@ -154,7 +154,7 @@ cases when it does not hold and correct our representation. Note that
 this assumption of optimism is only made in the description for the high
 level. The full algorithm plans with a complete belief representation; if
 multiple observations are needed to successfully localize an object, the algorithm
-will plan to do them.
+will plan to do them. In the event that our plan was overly optimistic BCheckSuccess on line 29 of \algoref{alg-ibsp} (described in the next section) will detect the overly optimistic behavior and will trigger a replan from the current state. Line 30 can be considered as recursive replanning.
 
 \subsection{The \ibsp{} algorithm}
 \label{sec-ibsp}
