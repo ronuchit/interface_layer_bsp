@@ -267,7 +267,7 @@ change to the algorithm. Thus, our result is a belief space planning
 algorithm that operates with only black box access to the belief
 distribution. As an example, our experiments run with no modification
 to the planning code for uniform distributions, unimodal Gaussian
-distributions, and multimodal Gaussian distributions.
+distributions, and multimodal Gaussian distributions. Our implementation also works with discrete distributions, which can be formulated as a multimodal Gaussian where every Gaussian is collapsed to a Dirac delta function.
 
 We can extend the completeness proof from Srivastava et
 al.~\cite{srivastava2014combined} to provide conditions that the
