@@ -71,26 +71,25 @@ essentially follows the dynamics specified in
 partial observability, we add the following fluents and operators:
 \begin{tightlist}
   \item[]Fluents: \\\emph{MLInView}(r\_pose, o\_pose\_bel)\\
-    \emph{MLOccludes}(obj, o\_pose\_bel, r\_obs\_pose)\\
-    \emph{MLObstructs}(obj, traj)\\
+    \emph{MLOccludes}(o, o\_pose\_bel, r\_obs\_pose)\\
+    \emph{MLObstructs}(o, traj)\\
     \emph{UncertainGP}(o\_pose\_bel, r\_pose, grasp)\\
-    \emph{UncertainObstructs}(obj, traj)
+    \emph{UncertainObstructs}(o, traj)
   \item[]Operators:
   \begin{tightlist} \item \emph{ObserveGP}(r\_obs\_pose, o, o\_pose\_bel)
 \begin{tightlist}
   \item[\emph{pre}:] \emph{MLLoc}(o, o\_pose\_bel) $\wedge$
-    \emph{MLRLoc}(r\_obs\_pose) \\$\wedge$ $\forall o_i
-    \lnot$\emph{MLOccludes}($o_i$, o\_pose\_bel, r\_obs\_pose) \\ $\wedge$
-    \emph{MLInView}(r\_obs\_pose, o\_pose)
+    \emph{RLoc}(r\_obs\_pose) \\ $\wedge$
+    \emph{MLInView}(r\_obs\_pose, o\_pose) \\ $\wedge$ $\forall o_i
+    \lnot$\emph{MLOccludes}($o_i$, o\_pose\_bel, r\_obs\_pose)
   \item[\emph{eff}:] $\forall$ r\_p, g $\lnot$\emph{UncertainGP}(o\_pose\_bel, r\_p, g)
 \end{tightlist}
 \item  \emph{ObserveTrajectory}(r\_obs\_pose, traj) 
 
 \begin{tightlist}
-  \item[\emph{pre}:] \emph{MLRLoc}(r\_obs\_pose) \\$\wedge$
+  \item[\emph{pre}:] \emph{RLoc}(r\_obs\_pose) \\$\wedge$
     \emph{MLInView}(r\_obs\_pose, traj)\\ $\wedge$
-    $\forall o_i \lnot$\emph{MLOccludes}($o_i$, traj, r\_obs\_pose)\\ $\wedge$
-    $\forall o_i \lnot$\emph{MLObstructs}(obj, traj)
+    $\forall o_i \lnot$\emph{MLOccludes}($o_i$, traj, r\_obs\_pose)
   \item[\emph{eff}:] $\forall o_i \lnot$\emph{UncertainObstructs}($o_i$,
     traj)
 \end{tightlist}
@@ -110,10 +109,10 @@ same trajectory.
 
 \subsection{Observation model and state estimation for the PR2}
 We model observations with ray casting from a simulated head-mounted
-Kinect on our robot. For objects that are in the view
-frustum, we get a false negative with probability proportional to the
-amount of the object that is occluded. If we do get a positive
-observation, we observe the object's true pose with Gaussian noise.
+Kinect on our robot. If an object is in the view frustum and at least 50\% visible we assume a positive observation and observe its true pose with Gaussian noise.
+% For objects that are in the view frustum, we get a false negative with probability proportional to the
+% amount of the object that is occluded. If we do get a positive
+% observation, we observe the object's true pose with Gaussian noise.
 
 
 In order to successfully plan for this domain, it is important that we
@@ -130,10 +129,10 @@ associated with negative observations. We refer to the first component
 as the positive observation distribution and the second as the
 negative regions. To sample from this distribution, we perform
 probabilistic rejection sampling: sample from the positive observation
-distribution and then discard the sample in inverse proportion to the
+distribution and then discard the sample with some probability. The probability with which we discard a sample is inversely proportional to the
 probability that it lies in a negative region. The inverse
-probability is given by $\max(1,\dfrac{\text{penetration
-    depth}}{\text{object radius}})$, where penetration depth is the
+probability is given by the following heuristic: $\max(1,\dfrac{\text{penetration
+    depth}}{\text{object radius}})$ where penetration depth is the
 minimum translation distance that takes two objects out of collision and object
 radius is found by approximating the object as a sphere.
 
@@ -175,9 +174,12 @@ obstruction fact is also discovered and accounted for. During execution, upon pe
 chooses to refine the plan if the object was not actually seen (indicating that its true location is in another drawer).
 The new refinement incorporates this negative observation, and the system may then try opening another drawer.
 
-Table \ref{table:results} shows timing results for the three described
-tasks. \figref{fig:drawerimgs} and \figref{fig:corridorimgs} show intermediate steps and belief
-states for the drawer and corridor tasks. The included video demonstrates plan execution for all three tasks.
+Belief distributions containing many modes can be problematic under the \mld{} formulation. Consider a distribution with 100 modes scattered around a large room. It will take a really long time before the robot finds the object, especially if every observe action results in a new ML pose located far away from the current one. The same issue arises when searching for objects with large uniform distributions. All points on a uniform distribution are equally likely so the new ML location is chosen at random.
+
+Another limitation is the use of rejection sampling. There is a noticeable slowdown in planning time when dealing with environments containing many geometric constraints.
+% Table \ref{table:results} shows timing results for the three described
+% tasks. \figref{fig:drawerimgs} and \figref{fig:corridorimgs} show intermediate steps and belief
+% states for the drawer and corridor tasks. The included video demonstrates plan execution for all three tasks.
 
 
 \begin{table}
