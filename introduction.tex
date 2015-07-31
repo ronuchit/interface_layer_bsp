@@ -1,87 +1,96 @@
 \section{INTRODUCTION}
 A central goal in robotics is the execution of long-horizon tasks in
-the face of uncertainty. Any reader that has spent frantic mornings
-searching for lost keys understands the challenges such problems
+the face of uncertainty. Readers that have spent frantic mornings
+searching for lost keys understand the challenges such problems
 present. Completing such a task corresponds to reasoning about
-multimodal belief distributions where obtaining an observation
-can require long, temporally extended plans. 
+multi-modal belief distributions and obtaining a meaningful observation
+can require prohibitively long sequences of primitive actions.
 \begin{figure}[h]
   \centering
     \noindent
     % \includegraphics[width=0.45\textwidth]{corridor_images/obj_at_true_loc.png}
     \includegraphics[trim = 160mm 90mm 0mm 90mm, clip, width=0.85\textwidth]{corridor_images/corridor_path_2.png}
   \caption{A screenshot from one of our experiments. The robot is
-    tasked with navigating to the other side of the corridor through a uniform distribution over obstacles. Our low
-    level refinement algorithm detects the probability of obstruction and
-    propagates this information to the high level. The objects shown are
-    from the posterior distributions of multiple obstacles after several negative
-    observations. If an obstacle is observed the posterior distribution for that obstacle will be concentrated around the observed pose.}
+    tasked with navigating to the other side of the corridor through a
+    uniform distribution over obstacles. Our low-level refinement
+    algorithm detects likely obstructions and propagates
+    this information to the high level. The objects shown are from the
+    posterior distributions of multiple obstacles after several
+    negative observations.}
   \label{fig:knot_steps}
 \end{figure}
 
+A solution to this task is a policy that accounts for uncertainty in
+locations of objects, uncertainty in robot position, and
+non-determinism in the dynamics (among other challenges). Solving such
+problems exactly is far beyond the state of the art in partially
+observable Markov decision processes (\pomdp).
 
-Discovering a solution to this task necessitates finding a policy that
-accounts for uncertainty in locations of objects, uncertainty in robot position,
-and non-determinism in the dynamics (among other
-challenges). Solving such problems exactly is far beyond the state of
-the art in partially observable Markov decision processes (\pomdp).
-
-Given the intractability of this problem, how can we hope to make
-progress? Our starting point takes inspiration from recent methods for
-fully observed task and motion planning.  This is a challenge in its
+Given the intractability of exact solution, we propose an approximate
+approach. Our starting point takes inspiration from recent methods for
+fully observed task and motion planning. This is a challenge in its
 own right, but careful applications of abstraction, lazy
-discretization, and motion planning have made inroads on this
-problem~\cite{srivastava2014combined, lozano2014constraint}. These
+discretization, and motion planning have made
+inroads~\cite{srivastava2014combined, lozano2014constraint}. These
 approaches plan in an \emph{abstract} representation of a problem
-(without continuous variables) then use sampling and motion planning to
-\emph{refine} abstract plans into fully grounded plans involving continuous
-operators.
+(without continuous variables) then use sampling and motion planning
+to \emph{refine} abstract plans into fully grounded plans with
+continuous parameterizations.
 
-A key insight is that many of the difficulties in planning with belief
-states, which are inherently continuous, are shared by the continuous
-state-action spaces for task and motion planning. This suggests a
-strategy that applies similar abstraction techniques to belief state
-representations of a planning problem.
+An important development in approximate solutions to \pomdp s is the
+\emph{maximum likelihood observation} (\mld)
+determinization~\cite{platt2010belief}. This approximation assumes
+that each belief state produces its maximum likelihood
+observation. The result is a deterministic problem that encourages
+goal directed information-gathering behavior. In this work, we extend
+the domain abstraction techniques from Srivastava et
+al.~\cite{srivastava2014combined} to \mld{} approximations of large
+continuous \pomdp s.
 
-Another important development is that of \emph{maximum likelihood
-  determinizations} (\mld) of \pomdp s~\cite{platt2010belief}. This
-approximation assumes that each belief state produces its maximum
-likelihood observation. The result is a deterministic problem that
-encourages reasonable information-gathering behavior. It is amenable
-to suitably modified standard methods; these methods typically
-prescribe solving a complex, continuous, under-actuated
-problem. Integration with task planners provides relief from this
-problem---high level tasks often decompose a problem so that
-observation planning and motion planning are separate.
+Our primary contribution relies on an abstraction mechanism that
+compactly represents belief state dynamics for \mld{}
+determinizations. As an example, consider a fluent,
+\emph{BGraspPose}(o, o\_pose\_bel, r\_pose, grasp), whose arguments
+are, respectively, an object reference, a distribution over object
+poses, a distribution over robot poses, and a grasp. This fluent is
+true if the (unobserved) actual poses represent a successful grasp
+with some preset probability. We show in \secref{sec-bsp-formulation}
+that directly determinizing this formulation and applying the
+skolemization approach from \cite{srivastava2014combined} leads to
+unsatisfactory behavior.
 
-We present an algorithm, Interfaced Belief Space Planning (\ibsp),
-that leverages these insights. It extends the domain abstraction
-techniques from Srivastava et al.~\cite{srivastava2014combined} to
-\mld{} formulations of large continuous \pomdp s. We leverage properties
-of the \mld{} to construct a simple high-level representation of belief
-states in order to compactly represent (optimistic) belief state dynamics. The algorithm alternates among extracting a plan
-skeleton, assigning values to continuous variables, and updating the
-high level with failure information when a refinement cannot be found.
-\ibsp{} enforces a clear separation among extracting plan skeletons
-from a domain description, refining a plan skeleton, and determining
-success or failure of a plan; furthermore, each component relies on
-standard operations. Our implementation uses off-the-shelf classical
-planners to generate plan skeletons along with sampling and trajectory
-optimization to generate refinements.
+Our approach avoids this issue by using properties of \mld{}
+determinizations. If \emph{BGraspPose} fails to hold, then either 1)
+the maximum likelihood state does not represent a successful grasp; or
+2) it does, but there is too much uncertainty in the belief to have a
+high probability of success. The key insight we leverage is that, in a
+maximum likelihood observation determinization, the correct response
+to the first scenario is to change the maximum likelihood state, while
+the correct response to the second is to observe more.
 
-Our refinement strategy only requires the ability to compute maximum
-likelihood observations for a belief state and the ability to filter
-beliefs. We detect plan failure and propose state updates with Monte Carlo
-sampling. Such structured access to the belief state allows \ibsp{} to work with a broad class
-of beliefs with minimal algorithmic changes. While our high-level
-planner uses an abstract belief representation, the full algorithm
-plans with the true belief dynamics and is capable of generating and executing plans
-with complex state estimation methods. We validate our approach in
-partially observable mobile manipulation tasks with a variety of
-belief distributions that account for negative observations, such as object retrieval from
-one of many possible drawers and navigation through a corridor containing several objects
-whose locations are only initially known to be in a uniform distribution over the corridor. We
-present formal results showing completeness for a subclass of \pomdp s.
+We show how to use this insight to generate useful abstractions in
+\secref{sec-optimism} and give a novel algorithm, Interfaced Belief
+Space Planning (\ibsp), that applies a determinization-replan approach
+to large continuous \pomdp s. \ibsp{} extends the interface of
+\cite{srivastava2014combined} and enforces a clear separation among
+extracting a plan skeleton from a domain description, refining a plan
+skeleton, and determining success or failure of a plan. Our
+implementation uses an off-the-shelf classical planner to generate
+plan skeletons and sampling and trajectory optimization to generate
+refinements and determine their validity.
+
+An important property of our solution is that it relies on standard
+belief state queries, such as sampling and maximum likelihood
+computation. Such structured access to the belief state allows \ibsp{}
+to work with a broad class of potentially complex state-estimation
+methods with no algorithmic changes. We validate our approach in a set
+of simulated partially observable mobile manipulation tasks. A
+representative task is object retrieval from one of many possible
+drawers. Long action sequences are required to generate useful
+observations and correctly accounting for negative observations is
+necessary for success. Our algorithm reasons about
+obstructions and occlusions to generate plans to find its goal object,
+while ensuring safety requirements are met.
 
 %%PA: it'd be really good to include specifics about the
 %%scenarios in which we evaluate our approach and specifics about the 

@@ -2,92 +2,91 @@
 Our work builds on recent results in deterministic task and motion
 planning. Early work in task and motion planning was embodied in the
 aSyMov system~\cite{gravot2005asymov}, where a task plan was generated
-and used to guide motion planning. However, the focus was on
+and used to guide motion planning. The focus of this work was on
 determining a way to solve motion plans in parallel. Dornhege et
 al. use semantic attachments to do task and motion planning with
 classical planners~\cite{dornhege2012semantic}. This approach makes
-use of task planners, but requires representation of discretized
-locations within the high level. Havur et al. use local search to find
-an optimal geometric configuration before discretizing the continuous
-plane into non-uniform cells and using a hybrid planner to find a
-feasible motion plan~\cite{havur2014geometric}. Lagriffoul et
+use of task planners, but requires symbolic representation of discretized
+locations. Havur et al. use local search to
+find an optimal geometric configuration before discretizing the
+continuous plane into non-uniform cells and using a hybrid planner to
+find a feasible motion plan~\cite{havur2014geometric}. Lagriffoul et
 al. parameterize symbolic actions with coarse geometric
-representations of objects and grasp types. Possible geometric
-instances are sampled from the symbolic plan and are pruned by
-constraints to reduce geometric
+representations of objects and grasp types. During refinement they
+estimate the feasible region for continuous parameters and use these
+regions as constraints to reduce geometric
 backtracking~\cite{lagriffoul2014orientation}.
 
-Maximum likelihood determinization was introduced by Platt et
-al.~\cite{platt2010belief}. They used this approach to frame problem
-solving in belief space as an underactuated control problem. They use
+Maximum likelihood observation determinization was introduced by Platt
+et al.~\cite{platt2010belief}. They used this approach to frame
+planning in belief space as an underactuated control problem. They use
 LQR and transcription methods to find trajectories in belief space and
 characterize scenarios where a replanning strategy is guaranteed to
 succeed. Van Den Berg et al. use LQG to solve Gaussian belief space
 planning problems that incorporate collision avoidance
-constraints~\cite{van2012motion}. They are able to plan without
-the maximum likelihood assumption and explore the approximations
-introduced with maximum likelihood determinizations.
+constraints~\cite{van2012motion}. They are able to plan without the
+maximum likelihood observation assumption and explore the
+approximations introduced with maximum likelihood determinizations.
  
 Our determinization-replan approach shares similarity with
 determinization-replan approaches for probabilistic planning, such as
 FF-replan~\cite{yoon2007ff}. Both leverage determinization in order to
 obtain major performance gains from classical planners. The maximum
-likelihood assumption is similar to the most likely transition
-determinization from that literature, while our optimistic belief
-updates are similar to an all outcomes determinization.
+likelihood observation assumption is similar to the most likely
+transition determinization from that literature, while our optimistic
+belief updates are similar to an all outcomes determinization.
  
-The idea of using knowledge space representations is an old idea in
+Knowledge space representations for planning are an old idea in
 artificial intelligence that dates back to McCarthy and
 Hayes~\cite{mccarthy1968some}. Bonet and Geffner provide in-depth
 experimentation and analysis of discrete deterministic partially
 observed planning~\cite{bonet2011planning}.  They provide conditions
 under which discrete formulations of partially observable planning
 (with binary, factored beliefs) can be compiled to sound and complete
-representations. The conditions for this are similar to conditions for
-our completeness theorem; however, our algorithms are aimed at large
-continuous problems for robotics while their work is aimed at
-classical planning.
+representations. Our algorithms are aimed at large continuous problems
+for robotics while their work focuses on classical planning.
 
 % Our approach relies on the maximum likelihood determinization
 % introduced by Platt et al.~\cite{platt2010belief}. They frame problem
 % solving in belief space as an underactuated control problem and apply
 % continuous techniques. 
 
-The Belief Space Hierarchical Planning in the Now (BHPN) planning and execution system is a task and motion planning
-approach to handle uncertainty~\cite{kaelbling2013integrated}. Similar
-to our approach, they construct task plans in belief space under
-maximum likelihood determinization. Levihn et al. extend this system
-to construct shorter plans at execution time by smart replanning and
-reconsideration~\cite{levihn2013foresight}. They explicitly formulate
-the regression of belief goals under Gaussian distributions and plan
-with an exact representation of belief state dynamics. In contrast, we
-use references to the belief so we can plan with arbitrary belief
-representations, not just Gaussians.
+The Belief Space Hierarchical Planning in the Now planning and
+execution system is a task and motion planning approach to handle
+uncertainty~\cite{kaelbling2013integrated}. They construct task plans
+in belief space under maximum likelihood observation
+determinization. Levihn et al. extend this system to construct shorter
+plans at execution time by smart replanning and
+reconsideration~\cite{levihn2013foresight}. They formulate the
+regression of belief goals under Gaussian distributions and plan with
+an exact representation of belief state dynamics. In contrast, we use
+references to the belief so our approach more easily extends to
+arbitrary belief representations.
 
 Srivastava et al. formulate open world \pomdp s with a probabilistic
-program~\cite{srivastava2014first} -- they develop a generalization of
-point-based value iteration to that setting. While both our method and
-theirs can been viewed as solving very large \pomdp s, their method's size stems from
-the (unbounded) size of the world and complexity of corresponding
-beliefs, while ours stems from uncertainty about continuous quantities.
+program~\cite{srivastava2014first} and develop a generalization of
+point-based value iteration to that setting. Both methods attempt to
+solve very large \pomdp s. In their setting the challenge is the
+(unbounded) size of the world and complexity of corresponding
+beliefs. The challenge in our work stems from uncertainty about
+continuous quantities.
 
 
 Gashler et al. use a contingent planner to generate plans that react
 to feedback from the world~\cite{gaschler2013kvp}. They generate
 contingent plans and use external function calls during their planning
-step to generate effects of actions. However, they explicitly
-represent poses and belief updates in symbolic models for task
-planning. We use pose and belief references to plan abstractly. We
-refine and verify plans with the \emph{true} belief.
+step to generate effects of actions. However, they represent poses and
+belief updates symbolically for task planning. We use pose and belief
+references to plan abstractly. We refine and verify plans with the
+\emph{true} belief.
 
 Nebel et al. use a three valued logic for the TidyUp project that
 allows fluents to take the value
-\emph{uncertain}~\cite{nebel13aaaiirs}. In their system, however, they
-assume that uncertain items become known once the robot is close
-enough and so do not explicitly plan sensing actions. In contrast, we
-represent uncertainty directly and combine
-reasoning about uncertainty with reasoning about maximum likelihood
-states.
+\emph{uncertain}~\cite{nebel13aaaiirs}. They assume that uncertain
+fluents become known once the robot is close enough and so do not
+explicitly plan sensing actions. In contrast, we represent uncertainty
+directly and combine reasoning about uncertainty with reasoning about
+maximum likelihood states.
 
 %% Our determinization-replan approach shares similarity with
 %% determinization-replan approaches for probabilistic planning, such as

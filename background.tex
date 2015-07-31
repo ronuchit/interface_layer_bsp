@@ -2,11 +2,11 @@
 \subsection{Observable planning formulation}
 \label{sec-formulation}
 We use a STRIPS-style formalism to define our planning problems. We
-introduce a simple pick and place task that will serve as a running
-example for the paper. 
+introduce it with a pick-and-place task that will serve as a running
+example for the paper.
 
-Formally, we define a (fully observed) planning problem, $\Pi$ as a tuple, $\Pi =
-\langle \E, \F, I, G, \Ops \rangle$, with the following definitions:
+We define a (fully observed) planning problem, $\Pi$ as a tuple, $\Pi
+= \langle \E, \F, I, G, \Ops \rangle$, with the following definitions:
 \begin{tightlist}
 \item[$\E$:] a set of \emph{entities} within our domain; e.g., individual objects or locations.
 \item[$\F$:] a set of \emph{fluents} that describe relations between
@@ -18,20 +18,29 @@ Formally, we define a (fully observed) planning problem, $\Pi$ as a tuple, $\Pi 
   \emph{preconditions}, \emph{pre(op)}, a conjunction of fluents that captures the set of states where an operator is applicable; and \emph{effects}, \emph{eff(op)}, which specifies the fluents that become true or false after executing \emph{op}.
 \end{tightlist}
 A solution to $\Pi$ is a sequence of operators and states, $\{(op_1,
-s_1),\ldots,(op_N, s_N)\}$, such that preconditions are satisfied and
-the goal is achieved. That is, $s_i~=~apply(eff(op_i),~s_{i-1});~
-pre(op_i)~\in~s_{i-1},$ $pre(op_0)~\in~I;~s_N~\in~G$. We now give
-a specification for our pick and place task:
+s_1),\ldots,(op_N, s_N)\}$. To be a valid solution, the preconditions
+for each operator must be satisfied in the state that precedes
+it. $op_1$'s preconditions must be satisfied in the initial state and
+the goal fluents must be satisfied in $s_N$. Subsequent states must
+add the effects of the intermediate operator to the
+previous state (i.e., $s_{i+1}$ is obtained by applying $op_i$'s effects to $s_i$). We
+illustrate this with a specification of a pick-and-place task:
 \begin{tightlist}
-\item[$\E$] objects ($o_i$, represented as strings), Null (a
+\item[$\E$:] objects ($o_i$, represented as strings), Null (a
   nonexistent object), object poses (continuous 6DOF), robot poses
   (continuous 20DOF), robot trajectories (continuous $20\cdot~T_{max}$ dimensional),
   and grasps (continuous 6DOF).
-\item[$\F$] \emph{Loc}(obj,~obj\_pose), \emph{RLoc}(r\_pose),
+\item[$\F$:] \emph{Loc}(obj,~obj\_pose), \emph{RLoc}(r\_pose),
   \\\emph{Obstructs}(obj,~traj), \emph{Holding}(obj,~grasp),
   \\\emph{Connects}(r\_pose1,~r\_pose2,~traj),
   \\\emph{GraspPose}(obj,~obj\_pose,~r\_pose,~grasp).
-\item[$\Ops$] \begin{tightlist} \item \emph{Pick}(obj, obj\_pose, r\_pose, grasp)
+\item[$\Ops$] \begin{tightlist}\item \emph{MoveTo}(r\_pose1, r\_pose2, traj) \begin{tightlist}
+\item[\emph{pre}:] \emph{RLoc}(r\_pose1) $\wedge$
+  \emph{Connects}(r\_pose1, r\_pose2, traj) $\wedge$ $\forall$i
+  $\lnot$\emph{Obstructs}($o_i$, traj)
+\item [\emph{eff}:] \emph{RLoc}(r\_pose2) $\wedge$ $\lnot$\emph{Rloc}(r\_pose1)
+\end{tightlist}
+\item \emph{Pick}(obj, obj\_pose, r\_pose, grasp)
 \begin{tightlist}
    \item[\emph{pre}:] \emph{RLoc}(r\_pose) $\wedge$ \emph{Holding}(Null, Null) \\$\wedge$ \emph{GraspPose}(obj,~obj\_pose, r\_pose, grasp) \\$\wedge$ \emph{Loc}(obj, obj\_pose)
    \item[\emph{eff}:] \emph{Holding}(obj, grasp) $\wedge$ $\lnot$\emph{Loc}(obj, obj\_pose) \\$\wedge$ $\lnot$\emph{Holding}(Null, Null) \\$\wedge$ $\forall$t $\lnot$\emph{Obstructs}(obj, t)
@@ -47,38 +56,40 @@ a specification for our pick and place task:
 While this representation unambiguously specifies problems, the
 presence of continuous parameters and conditional effects that depend
 on these parameters (e.g., new obstructions from placing an object)
-prevents directly passing this representation to a classical
-planner. We will need to compile our specification into a discrete
-problem that classical planners can readily solve.
+prevents direct solution with a classical planner. 
 
-We achieve this through the abstraction of continuous aspects of our
-state in the style of Srivastava et
-al.~\cite{srivastava2014combined}. The key step in this approach
-replaces continuous variables by a discrete set of references to useful
-potential values. These references are included as objects in
-the domain description with appropriate facts for the symbolic planner
-to interpret them.
+To use task planners in this setting, we abstract the continuous
+aspects of our state in the style of Srivastava et
+al.~\cite{srivastava2014combined}. The key step replaces continuous
+variables by a discrete set of references to useful sets of continuous
+values. These references are entities in a discrete formulation where
+the initial state includes fluents that characterize these sets. This
+process is called \emph{skolemization} and we refer to the introduced
+entities as \emph{skolem variables}.
 
 For example, in order to derive an abstract representation of the pick
 operation for object $o_i$, we need a reference to the pose of the
-object, pose of the robot and the grasp we will use to pick it. We represent these as
-functions: \emph{ObjPose}($o_i$), \emph{RPose}($r$), \emph{Grasp}($o_i$, $r$). These are represented to the
-classical planner as standard discrete objects; we then declare facts
-about these variables that are guaranteed to be true. This process is
-referred to as \emph{skolemization}.
+object, the pose of the robot and the grasp it will use to pick it. To
+abstract the pose of $o_i$ we introduce a new entity,
+\emph{ObjPose}($o_i$), and include the fluent \emph{Loc}($o_i$,
+\emph{ObjPose}($o_i$)) to characterize it. Intuitively, the new symbol
+can be understood as `the pose that makes \emph{Loc}($o_i, \cdot$)
+true.' We replace the robot pose and grasp with similar symbols,
+parameterized by \emph{ObjPose}($o_i$), and include a \emph{GraspPose}
+fluent that links the object identifier to the introduced
+entities.
 
 To capture the effects of actions that use these parameters, we use
 \emph{sound} representations: facts which are guaranteed to become
-true are included, but conditional effects are not. These are effects
-that depend on the particular binding of a skolem variable. For
-example, after executing a place action we know that \emph{Loc}($o_i$,
-ObjPose($o_i$)) will be true, but the particular obstructions introduced
-will depend on the exact bindings of ObjPose($o_i$). We include the
-former in our description and rely on an interface layer to discover
-conditional facts, such as the latter, as they become relevant and update the high level
-description accordingly. The process of assigning values to the variables
-of a high level plan is called \emph{refinement} of the high level
-plan.
+true are included, but conditional effects that depend on the
+particular binding of a skolem variable are not. For example, after
+executing a place action, \emph{Loc}($o_i$, ObjPose($o_i$)) will always
+be true, but the particular obstructions introduced will depend on the
+exact binding of ObjPose($o_i$). We include the former in our
+description and rely on an interface layer to discover conditional
+effects (e.g., introduced obstructions) as they become relevant. The
+process of assigning values to the variables of a high level plan is
+called \emph{refinement} of the high level plan.
 
 \begin{algorithm}
  \caption{An interface for deterministic problems} \label{alg-ifop}
@@ -86,9 +97,10 @@ plan.
   \Procedure{InterfacePlan}{$S_0, \gamma$}
   \State $S \leftarrow S_0$
   \State $s \leftarrow $ExtractSymbols$(S_0)$
-  \State $p_{pre} \leftarrow None$
-  \State $R_{pre} \leftarrow None$
-  \State $p_{post} \leftarrow $ Plan$(s, \gamma)$
+  \State // Keep track of the successfully refined plan prefix
+  \State $p_{pre} \leftarrow None$ 
+  \State $R_{pre} \leftarrow None$ 
+  \State $p_{post} \leftarrow $ Plan$(s, \gamma)$// unrefined plan skeleton
   \While {not resource limit reached} 
      \State $R_{post} \leftarrow $ MotionPlan$(s, p_{post})$
      \State $is\_fail, i_{fail}, failure$\\\hspace{50pt}$ \leftarrow $ CheckSuccess$(S, (p_{post}, R_{post}))$
@@ -112,42 +124,35 @@ plan.
 \algoref{alg-ifop} shows pseudocode for such an interface layer. Lines
 1-5 set up our planning problem. Line 6 constructs a high level
 plan. Lines 8-10 attempt to find a motion plan for the high level
-plan. If refinement fails, we identify a fact that was missing from
-the high level plan that may have caused failure, and the high level then
-replans from that step.
+plan. If refinement fails, we identify a conditional effect of the
+high level plan that may have caused failure, update our description,
+and replan.
 % This provides a random trajectory (as the refinement step is randomized) through the solution space. If we cannot find a solution, we reset random seeds and replan from the initial state.
 This integration is complete for a subclass of planning
 problems~\cite{srivastava2014combined}.
 
 
 
-\subsection{Assumed maximum likelihood determinization}
+\subsection{Assumed maximum likelihood observations}
 In this paper, we consider problems from a more general class than is
-described in \secref{sec-formulation} -- problems with partial
+described in \secref{sec-formulation}---problems with partial
 observability. To solve partially observable problems with
-deterministic solvers, we use the \emph{maximum
-  likelihood determinization} (\mld)~\cite{platt2010belief}.
+deterministic solvers, we use the \emph{maximum likelihood
+  observation} (\mld) determinization of Platt et al.~\cite{platt2010belief}. Here
+we give a brief description of their method.
 
 The introduction of partial observability into a planning problem
-associates with each state a distribution over observations. For
+associates each state with a distribution over observations. For
 example, a state where a robot's depth sensor is pointed at an object
-might give a noisy measurement of the object's pose. A solution for
-this problem is a policy that maps a \emph{belief state}, a
-probability distribution over states, to actions.
+might give a noisy measurement of the object's pose. A solution is a
+policy that maps a \emph{belief state}, a probability distribution
+over states, to actions.
 
 The central idea behind the \mld{} is that, if we fix the observation
-for each state, the Bayesian updates to our belief are
-deterministic. For example, in the Gaussian case, belief dynamics are
-defined by the Kalman filter update equations, and fixing the
-observation for each state reduces this to a deterministic
-update. While there are many determinizations of belief space
-problems, the benefit of the \mld{} is that it is a deterministic
-problem that still generates information-seeking behavior.
-
-%% Smaller determinized problems can be solved with LQR approaches or
-%% direct SQP optimization~\cite{platt2010belief,
-%%   patil2014scaling}. These solutions are then used in a model
-%% predictive control paradigm---a trajectory is computed, the first step
-%% is executed, the true next belief state is observed, and the process
-%% repeats. Our approach will apply this paradigm to larger plans that
-%% leverage task and motion planning.
+for each belief state, updates to our belief are deterministic. For
+example, belief dynamics with Gaussian state distributions and
+Gaussian noise are defined, for each observation, by the Kalman filter
+update equations. Fixing the observation for each state reduces this
+to a deterministic update. While there are many determinizations of
+belief space problems, the benefit of \mld{} is that it is a
+deterministic problem that generates information-seeking behavior.

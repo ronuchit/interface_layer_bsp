@@ -1,12 +1,11 @@
 \section{Interfaced belief space planning}
 In this section, we present our primary contribution: \ibsp, a modular
 approach to task and motion planning in belief
-space. \secref{sec-bsp-formulation} extends our symbolic
-representation to include belief states. \secref{sec-optimism} details
-an approach based on optimistic observations and a simplified belief
-representation to compactly represent belief space dynamics.
-\secref{sec-ibsp} describes the \ibsp{} algorithm in detail and provides conditions
-under which it is complete.
+space. \secref{sec-bsp-formulation} extends our formulation of the
+problem to include partial observability. \secref{sec-optimism}
+details an approach based on optimistic observations to obtain a
+useful abstraction of belief space dynamics.  \secref{sec-ibsp}
+describes the \ibsp{} algorithm in detail.
 
 %%PA: this entire section is very technical; it'd be really nice if
 %%the intro (or otherwise here, but probably the intro) had a
@@ -21,75 +20,40 @@ under which it is complete.
 In our full description of the problem, we need to allow for
 probabilistic representations in belief space. We restrict ourselves
 to problems where the uncertainty is confined to the continuous state
-(e.g., %%PA: -> e.g.,,
-we may not know $o_1$'s location, but we know its name and whether
-we are holding it). The entities for our partially observed problems include distributions over object poses, observation poses and the entities carried over from the pick-and-place task described in the background section.
-Our fluents will describe relations between these entities. The
-initial state and goal are defined in the same manner. Our input
-additionally specifies a conditional distribution over observations
-given the state.
+(e.g., we may not know $o_1$'s location, but we know its name and
+whether we are holding it). The entities for a partially observed
+version of our pick-and-place domain are distributions over object poses,
+observations, and the entities described in
+\secref{sec-formulation}. We replace the fluents from our pick-and-place
+domain with belief fluents that are true if the corresponding
+(deterministic) fluent holds with high probability. For example,
+we have a fluent, \emph{BGraspPose}, which is true if \emph{GraspPose}
+is true with high enough probability. Our input specifies a
+distribution over observations that is conditioned on the state.
 
-We assume that our operators are separated into \emph{actions}, which
-alter the true state but do not get any information about it, and
-\emph{observations}, which do not alter the true state but garner
-information about it. Actions are deterministic in belief space
+We divide our operators into \emph{actions}, which alter the true
+state, and \emph{observations}, which do not alter the true state but
+garner information about it. Actions are deterministic in belief space
 (even when the underlying dynamics are not) and follow a similar
-parametrization to the deterministic case.
+parametrization to the deterministic case. Observation operators are
+parameterized by the belief about state variables that determine the
+observation distribution.
 
-The source of non-determinism in our specification is confined to
-observations. An observation operator is parametrized by the belief
-about state variables that determine its conditional distribution. To
-formalize the \mld{}, we include a fluent, \emph{MLObs}(obs, $p_1$,
-$p_2$, \ldots), that is true iff obs is the maximum likelihood
-observation under the state distribution specified by the $p_i$. We
-include the observation as a parameter of the operator and include the
-\emph{MLObs} fluent as a precondition. This provides us a deterministic
-planning problem of the kind described in \secref{sec-formulation}.
+This dichotomy restricts non-determinism to observations, so
+determinizing observations obtains a representation suitable for task
+planning. In principle, one can directly determinize the problem in
+this representation and apply skolemization to get a sound description
+of abstract belief dynamics. However, such an approach will ofter fail
+to generate meaningful high-level plans.
 
+We illustrate this issue with a belief space formulation of the
+\emph{Pick} operator. To simplify description, we represent objects in
+the frame of the robot and assume that the robot's pose in its own
+frame is known.
 
-It is tempting to attempt to apply the skolemization approaches from
-\cite{srivastava2014combined} to this representation. Unfortunately,
-that is unlikely to be successful in practice. The issue is that the
-number of skolemized observation variables will typically be
-exponential in the number of skolemized beliefs. For example, consider
-the following observation operator for our pick-and-place domain:\\
-\noindent\emph{Observe}(obs,~r\_bel,~$o_1$\_bel,~\ldots,~r\_bel',~$o_1$\_bel',~\ldots)
-\begin{tightlist}
-\item[\emph{pre:}] \emph{Rloc}(r\_bel) $\wedge$ \emph{Loc}($o_1$, $o_1$\_bel) $\wedge$ \ldots\\
-$\wedge$ \emph{Preimage\_RLoc}(obs, r\_bel, r\_bel')\\
-$\wedge$ \emph{Preimage\_At}(obs, $o_1$, $o_1$\_bel, $o_1$\_bel') $\wedge$\ldots\\
-$\wedge$ \emph{MLObs}(obs, r\_bel, $o_1$\_bel, \ldots)
-\item[\emph{eff:}] $\lnot$\emph{Rloc}(r\_bel) $\wedge$ $\lnot$\emph{Loc}($o_1$, $o_1$\_bel) $\wedge$ \ldots\\
-\emph{Rloc}(r\_bel') $\wedge$ \emph{Loc}($o_1$, $o_1$\_bel') $\wedge$ \ldots
-\end{tightlist}
-Creating a skolem function for the \emph{MLObs} fluent will
-require considering all combinations of the other beliefs. For small
-problems this approach may be reasonable, but for larger problems this
-direct abstraction is intractable.
-
-\subsection{Optimism for observations}
-\label{sec-optimism}
-The insight we use to solve this issue is that the \mld{} has very
-restricted dynamics for our problem class. An observation operator can
-only concentrate belief at the maximum likelihood location for a
-distribution. An action operator, on the other hand, could change the
-maximum likelihood location of a distribution (and potentially
-introduce variance into our beliefs). Thus, we reformulate our problem in terms of two types of fluents:
-those which characterize the maximum likelihood state, and those
-which characterize the certainty in our belief. The latter of the two
-shares similarities with the BVLoc($\epsilon$) fluents from Kaelbling
-and Lozano-P\'erez~\cite{kaelbling2013integrated}.
-
-We will illustrate this simplification with the \emph{Pick}
-operator. To simplify description, we represent objects in the frame
-of the robot and assume that the robot's pose in its own frame is
-known. It is possible to relax this assumption at the cost of
-introducing more complex descriptions.
-
-Using a full belief representation, we have the following
-description:\\
+In the full (intractable) representation, we have the following
+description:\\ 
 \emph{BPick}(o, o\_pose\_bel, r\_pose, grasp)
-\vspace{-2mm}
 \begin{tightlist}
 \item[\emph{pre:}] \emph{BLoc}(o, o\_pose\_bel) $\wedge$
   \emph{RLoc}(r\_pose) \\$\wedge$ \emph{BGraspPose}(o, o\_pose\_bel,
@@ -100,21 +64,45 @@ description:\\
   $\lnot$\emph{BObstructs}(o, t, h, g)\\$\wedge$ $\forall$ o\_p,
   r\_p $\lnot$\emph{BOccludes}(o, o\_p, r\_p)
 \end{tightlist}
-\emph{BGraspPose} characterizes distributions over the location of o
-such that the probability with which a grasp succeeds is higher than
-some safety margin. The issue is that this is only a conditional
-effect of observation actions, so a sound representation can never
-plan to make this true.  
+The first precondition captures that the continuous parameter
+o\_pose\_bel represents our current belief about the pose of o. The
+problematic precondition is \emph{BGraspPose}. The issue is that this
+a conditional effect of observation: it can only become true if
+properties of the belief state that depend on continuous values are
+true. The practical implication is that a task plan generated from
+such a representation would never select an observation
+action\footnote{In \cite{srivastava2014combined} conditional effects
+  only appear as negative preconditions and this allows sounds
+  representations to generate meaningful plans.}. Formulating a sound
+logic over general belief states dynamics that enables this reasoning
+is a challenging task and easily results in cumbersome and intractable
+representations.
 
-To rectify this issue we use the following property about an \mld{}
-representation. If \emph{BGraspPose} is not true, then one of two
-cases will hold: either 1) the maximum likelihood state doesn't contain a valid grasp pose or 2) the maximum likelihood state admits at least 1 valid grasp pose, but the distribution has too much variance to allow
-a successful grasp with high probability. In the first case, we must
-manipulate the state (e.g., move obstructions), while in the other we must observe it. We
-thus replace belief fluents with maximum likelihood fluents and
-\emph{uncertainty} fluents:\\
-\emph{MLPick}(o, o\_pose\_bel, r\_pose, grasp)
-\vspace{-1mm}
+\subsection{Optimism for observations}
+\label{sec-optimism}
+The insight we use to solve this issue is that belief updates for
+\mld{} often exhibit restricted dynamics: they will typically
+concentrate belief at the maximum likelihood state for a
+distribution. An action operator, on the other hand, can change the
+maximum likelihood state for a distribution (and potentially
+introduce variance). We need a formulation that
+allows the task planner to effectively select between these
+options. Thus, our approach reformulates a problem in terms of two
+types of belief state fluents: those which characterize the maximum
+likelihood state, and those which characterize the certainty in our
+belief. The latter of the two shares similarities with the
+BVLoc($\epsilon$) fluents from Kaelbling and
+Lozano-P\'erez~\cite{kaelbling2013integrated}.
+
+Returning to the preconditions for \emph{BPick}, there are
+two reasons \emph{BGraspPose} could fail to hold: either 1) the
+maximum likelihood state doesn't contain a valid grasp pose or 2) the
+maximum likelihood state admits at least 1 valid grasp pose, but the
+distribution has too much variance to allow a successful grasp with
+high probability. In the first case, we must manipulate the state
+(e.g., move obstructions), while in the other we must observe it. We
+replace belief fluents with maximum likelihood fluents and uncertainty
+fluents:\\ \emph{MLPick}(o, o\_pose\_bel, r\_pose, grasp)
 \begin{tightlist}
 \item[\emph{pre:}] \emph{MLLoc}(o, o\_pose\_bel) $\wedge$
   \emph{RLoc}(r\_pose) \\$\wedge$ \emph{MLGraspPose}(o,
@@ -137,26 +125,25 @@ observation operator:\\
     \emph{MLInView}(r\_obs\_pose, o\_pose\_bel)
   \item[\emph{eff}:] $\forall$ r\_p, g $\lnot$\emph{UncertainGP}(o\_pose\_bel, r\_p, g)
 \end{tightlist}
-This corresponds to a conditional effect of the original
-\emph{Observe} operator if we try to include \emph{UncertainGP}
-fluents in that representation: the true effect can only be guaranteed
-with complete knowledge of the true belief. However,
-in order to correct a high level plan, we must include these fluents as a
-possibility. We call this an \emph{optimistic} observation because the actual
-effect is not guaranteed, and we thus rely on the interface layer to discover
-cases when it does not hold and correct our representation. Note that
-this assumption of optimism is only made in the description for the high
-level. The full algorithm plans with a complete belief representation; if
-multiple observations are needed to successfully localize an object, the algorithm
-will plan to do them. In the event that our plan was overly optimistic BCheckSuccess on line 29 of \algoref{alg-ibsp} (described in the next section) will detect the overly optimistic behavior and will trigger a replan from the current state. Line 30 can be considered as recursive replanning.
+We call this an optimistic observation because the actual effect is
+not guaranteed. We rely on the interface layer to discover cases when
+it does not hold and correct our representation. Note that this
+assumption of optimism is only made in the high level description. The
+full algorithm plans with a complete belief representation: if
+multiple observations are needed to successfully localize an object,
+the algorithm will plan to take them them. In the event that our plan
+was overly optimistic, BCheckSuccess on line 10 of \algoref{alg-ibsp}
+(described in the next section) will detect the overly optimistic
+behavior and trigger replanning.
 
 \subsection{The \ibsp{} algorithm}
 \label{sec-ibsp}
 In this section, we detail the necessary changes to the interface from
-Srivastava et al. to handle our belief space formulation. The refinement operator from Srivastava et al. didn't work well with belief states because it would exhaustively search all pose combinations before realizing the true failure was actually from a belief fluent (e.g., UncertainGP). The primary
+Srivastava et al. to handle our belief space formulation. The primary
 change is that the refinement operation must find an assignment of
-continuous variables that maximizes the probability of
-`success.' \algoref{alg-ibsp} shows pseudocode with changes to \algoref{alg-ifop} highlighted in red.
+continuous variables that maximizes the probability of success,
+instead of simply satisfying constraints. \algoref{alg-ibsp} shows
+pseudocode with changes to \algoref{alg-ifop} highlighted in red.
 
 \begin{algorithm}
  \caption{The \ibsp{} planning algorithm} \label{alg-ibsp}
@@ -196,47 +183,47 @@ continuous variables that maximizes the probability of
  \end{algorithmic}
 \end{algorithm}
 
-
-We take as input a safety parameter $\epsilon$. This determines the
+We take as input a safety parameter, $\epsilon$. This determines the
 acceptable probability of failure for each step in the plan. The first
-change is that we replace \emph{MotionPlan} with \emph{MLRefine}. The
-difference is that \emph{MotionPlan} does collision-free motion
-planning to connect successive states, while \emph{MLRefine} minimizes
-the probability of collision. Both functions return a trajectory. \emph{MLRefine} can be defined either by
-direct trajectory optimization that minimizes an unnormalized likelihood of collision,
-or by sampling objects from the belief state and minimizing the number
-of samples that are in collision.
+change replaces \emph{MotionPlan} with \emph{MLRefine}. Both
+functions return a dictionary mapping skolem variables to continuous
+values. The difference is that \emph{MotionPlan} does collision-free
+motion planning to connect successive states, while \emph{MLRefine}
+minimizes the probability of collision. \emph{MLRefine} can be defined
+either by direct trajectory optimization to minimize an unnormalized
+likelihood of collision, or by sampling objects from the belief state
+and minimizing the number of samples that are in collision. The
+implementation for our experiments adopts the second approach.
 
-The second change is the introduction of \emph{BCheckSuccess}, which examines a refinement and
-checks that the preconditions
-are satisfied. We assume that preconditions are defined by a function
-that will return true or false indicating whether the precondition holds or not,
-given a state of the world. We determine
-that each of these is satisfied with probability greater than
-$1-\epsilon$ by Monte Carlo sampling from the belief
+The second change is the introduction of \emph{BCheckSuccess}, which
+examines a refinement and checks that preconditions are
+satisfied. \algoref{alg-bcheck} shows pseudocode for this method. We
+define preconditions with a function that maps a state to true or
+false and indicates whether the given relationship holds.  We
+determine that each of these is satisfied with probability greater
+than $1-\epsilon$ by Monte Carlo sampling from the belief
 state. $N_{samples}$ determines the fidelity of this sampling.
 
-The third change is the addition of \emph{MLFilter} which updates the belief state based on the maximum likelihood observations that occurred.
-
-When we detect failure for a belief fluent, we must decide which type
-of failure information to propagate to the high level. We do this by
-checking if the predicate holds in the maximum likelihood state. If it
-does, then our error is caused by uncertainty in our belief state, and so
-we propagate an uncertainty failure. Otherwise, we return a maximum
-likelihood fluent as the violated precondition. The exceptions to this
-rule are predicates about observations (e.g., occlusions). Because
-these are deterministic in our representation, it does not make sense
-to propagate uncertainty failures in this case. \algoref{alg-bcheck}
-illustrates these ideas.
-
+When we detect that a precondition does not hold, we must decide which
+type of failure information to propagate to the high level. We do this
+by checking if the predicate holds in the maximum likelihood state
+(Line 7). If it does, then our error is caused by uncertainty in the
+belief state, and we propagate an uncertainty failure. Otherwise,
+we return a maximum likelihood fluent as the violated
+precondition. The exceptions to this rule are predicates about
+observations (e.g., occlusions). These are deterministic in an \mld{}
+approximation, so it does not make sense to propagate uncertainty
+failures for them.
 
 \begin{algorithm}
  \caption{Determining failure or success of a refinement} \label{alg-bcheck}
  \begin{algorithmic}[1]
   \Procedure{BCheckSuccess}{$B, p, R, \epsilon$}
-      \For{$p_i , R_i$}
+      \State // Iterate over the sequence of high level actions      
+      \State // and their refinements
+      \For{$p_i, R_i \in $ zip($p, R$)} 
           \State preds $\leftarrow $ ExtractPreconds($p_i, R_i$)
-          \State W $\leftarrow$ Sample(B, $N_{samples}$)
+          \State W $\leftarrow$ Sample($B_i$, $N_{samples}$)
           \For{pred $\in$ preds}
               \If{ PercentSucceeds(pred, W) $< 1-\epsilon$}
                  \If {$\lnot$pred.eval(B.ML) or IsObs(pred)}
@@ -246,41 +233,52 @@ illustrates these ideas.
                  \EndIf
               \EndIf
           \EndFor
+          \State // update B with the results of this action
+          \State B $\leftarrow$ MLFilter$(B, p_i, R_i)$
       \EndFor
       \State \Return (True, -1, None)
   \EndProcedure
  \end{algorithmic}
 \end{algorithm}
-An important observation is that these implementations only require
-us to be able to sample from our belief distribution and/or compute
-unnormalized likelihoods. In order to compute the \mld{}, we need to be
-able to compute a maximum likelihood state estimate and maintain a
-filtered distribution. These are generic operations for belief states
-and are typically implemented for most state estimation
-techniques. This lightweight dependence on the form of the belief
-distribution allows one to switch state estimators with no
-change to the algorithm. Thus, our result is a belief space planning
-algorithm that operates with only black box access to the belief
-distribution. As an example, our experiments run with no modification
-to the planning code for uniform distributions, unimodal Gaussian
-distributions, and multimodal Gaussian distributions. Our implementation also works with discrete distributions, which can be formulated as a multimodal Gaussian where every Gaussian is collapsed to a Dirac delta function.
 
-We can extend the completeness proof from Srivastava et
-al.~\cite{srivastava2014combined} to provide conditions that the
-\mld{} for a planning problem will be solved by \ibsp{}.
-\begin{thm}
-Let $P$ be a partially observable planning problem with deterministic
-transitions. If the fully observed version of $P$ satisfies \emph{InterfacePlan}'s
-conditions for completeness, then \algoref{alg-ibsp}
-will find a solution to the \mld{} of $P$ with error
-rate $\epsilon$ as $N_{samples}\rightarrow \infty$, provided that all
-the calls to motion planning return.
-\end{thm}
-\begin{proof} (sketch) 
-Deterministic state transitions imply that the domain is uniform with
-respect to uncertainty predicates. The remaining predicates
-characterize the fully observed problem and satisfy the conditions for
-completeness by assumption. In the limit of infinite samples, we are able to
-exactly evaluate whether predicates are satisfied. These combine to satisfy
-the conditions to apply Theorem 1 from \cite{srivastava2014combined}.
-\end{proof}
+
+The third change is the addition of \emph{MLFilter}, which updates the
+belief state based on the maximum likelihood observation that
+occurred. This is a natural extension of ApplyActions from
+\algoref{alg-ifop} and is implemented with a black-box state
+estimation method.
+
+An important observation is that these implementations only require us
+to be able to sample from our belief distribution and compute
+unnormalized likelihoods. In order to compute the \mld{}, we need to
+be able to compute a maximum likelihood observation and maintain a
+filtered distribution. These are generic operations for belief states
+and are implemented for many state estimation techniques. Lightweight
+dependence on the form of the belief distribution allows one to switch
+state estimators with no change to the algorithm. Thus, \ibsp{} is
+a belief space planning algorithm that operates with black box access
+to the belief updates. As a result, our experiments run on several
+different initial state distributions with no modification to the
+planning code.
+
+%% We can extend the completeness proof from Srivastava et
+%% al.~\cite{srivastava2014combined} to provide conditions that the
+%% \mld{} for a planning problem will be solved by \ibsp{}. 
+%% \begin{thm}
+%% Let $P$ be a partially observable planning problem with deterministic
+%% transitions. If the fully observed version of $P$ satisfies
+%% \emph{InterfacePlan}'s conditions for completeness, then
+%% \algoref{alg-ibsp} will find a solution to the \mld{} of $P$ with
+%% error rate $\epsilon$ as $N_{samples}\rightarrow \infty$, provided
+%% that all the calls to motion planning return.
+%% \end{thm}
+%% \begin{proof} (sketch) 
+%% Deterministic state transitions imply that, once uncertainty fluents
+%% become false that they never become true again (i.e., the domain is
+%% uniform with respect to uncertainty fluents). The remaining predicates
+%% characterize the fully observed problem and satisfy the conditions for
+%% completeness by assumption. In the limit of infinite samples, we are
+%% able to exactly evaluate whether predicates are satisfied. These
+%% combine to satisfy the conditions to apply Theorem 1 from
+%% \cite{srivastava2014combined}.
+%% \end{proof}

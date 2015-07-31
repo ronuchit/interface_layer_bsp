@@ -22,15 +22,19 @@
   %%   \caption{After observing three drawers (object was seen)}
   %% \end{subfigure}
   \caption{Intermediate belief states from a sample execution in our
-    drawer search domain. We search for an object with a multimodal
-    Gaussian distribution over three drawers. We illustrate beliefs with
-    samples from the posterior distribution and show likelihoods with
-    the transparency of objects. In this case, the object was in the
-    leftmost drawer, and was found after searching the other
-    drawers because they had a higher likelihood of containing the object. (a) shows the initial state and (b) and (c) show
-    intermediate states at which we had to replan. Notice that we only clear
-    the obstruction in front of the drawer when it is close enough to hinder sufficient opening.
-    (d) shows the view cones from negative observations that were generated during planning.}
+    drawer search domain. The robot is initialized with a mixture of
+    Gaussians distribution that places the object in one of three
+    drawers. Beliefs are illustrated with samples from the posterior
+    distribution and likelihoods are indicated by the level of
+    transparency. In this run, the object was in the leftmost drawer
+    and was found after searching the other drawers because they had a
+    higher likelihood of containing the object. (a) shows the initial
+    belief. (b) and (c) show intermediate states where \ibsp{}
+    replanned after receiving an observation that indicated its
+    current plan would fail. Notice that we only clear the obstruction
+    in front of the drawer when it prevents opening the drawer far
+    enough to observe the object. (d) shows the view cones from
+    negative observations that were generated during planning.}
   \label{fig:drawerimgs}
 \end{figure}
 
@@ -53,17 +57,17 @@
     \caption{After 3 observations}
   \end{subfigure}
   \caption{Execution trace of interfaced belief space planning
-    traversing a corridor with uncertain obstacles.
-    The blue cylinders are drawn from the uniform belief distribution
-    during execution. After reaching the other side of the corridor,
-    the robot will pick up two target tables from the three tables.}
+    traversing a corridor with uncertain obstacles.  The blue
+    cylinders are drawn from a uniform prior distribution. After
+    reaching the other side of the corridor, the robot will search for
+    and pick up two target objects from the three tables.}
   \label{fig:corridorimgs}
 \end{figure*}
 
-We evaluate \ibsp{} in partially observable pick-and-place and navigation tasks.
-The robot in our simulation is a full model of the Willow Garage PR2. We
-provide results for several belief distributions: unimodal Gaussian, multimodal
-Gaussian, and uniform.
+We evaluate \ibsp{} in partially observable pick-and-place and navigation
+tasks.  The robot in our simulation is a full model of the Willow
+Garage PR2. We provide results for several prior distributions on
+object locations: uni-modal Gaussian, multi-modal Gaussian, and uniform.
 \subsection{Observation Operator Specification and Generators}
 The maximum likelihood component of the determinized problem
 essentially follows the dynamics specified in
@@ -97,90 +101,102 @@ partial observability, we add the following fluents and operators:
 \end{tightlist}
 
 The additional skolem functions needed to support this functionality
-are \emph{ViewPose}(Obj) and \emph{ViewPose}(Traj) for each object and
-trajectory reference. The generator for object view poses draws
+are \emph{ViewPose}(obj) and \emph{ViewPose}(traj) for object and
+trajectory references. The generator for object view poses draws
 samples from a 1-meter unit disc around the object, and the head pose
 is fixed to point at the object's maximum likelihood position. The
 generator for trajectory view poses returns the first step along the
 trajectory that has non-negligible probability of being in
-collision. To observe the uncertain step, a viable base pose is
-sampled from regions with negligible collision probability along the
-same trajectory.
+collision. To observe the uncertain step, a base pose is sampled from
+regions with negligible collision probability along the same
+trajectory.
 
-\subsection{Observation model and state estimation for the PR2}
-We model observations with ray casting from a simulated head-mounted
-Kinect on our robot. If an object is in the view frustum and at least 50\% visible we assume a positive observation and observe its true pose with Gaussian noise.
-% For objects that are in the view frustum, we get a false negative with probability proportional to the
-% amount of the object that is occluded. If we do get a positive
-% observation, we observe the object's true pose with Gaussian noise.
+\subsection{Observation model and state estimation}
+In our experiments, we use an observation model that accounts for
+false negatives, negative observations, and occlusion. We model our
+sensor as a simulated head-mounted Kinect. We use ray-casting with
+objects fixed to their maximum likelihood locations to build an
+estimate of the visible region of the \mld{} for a given pose.
 
+Under our model, we obtain false negatives in relation to the overlap
+of the object with the visible region. We measure this overlap as the
+ratio of penetration depth to the object radius. Penetration depth is
+the minimum translation distance that removes the object from the
+visible region and object radius is the radius of the smallest sphere
+that encloses the object. This amounts to observing a false negative
+with probability $1-\min \left( 1, \frac{\text{penetration
+    depth}}{\text{object radius}} \right)$. If we do not get a false
+negative, then we observe the object's pose with Gaussian noise.
 
-In order to successfully plan for this domain, it is important that we
-effectively incorporate negative observations into our
-updates. Without these negative observations, it is impossible to determine
-if a trajectory is clear without observing actual objects
-locations. 
+In our domains, correctly accounting for negative observations is
+critical: without them it is impossible to guarantee that a trajectory
+is safe without first localizing all objects it could collide with. To
+account for this, we use a factored representation of the belief
+state. For each object we maintain an explicit posterior distribution
+over its position (e.g., Kalman filter) that summarizes positive
+observations and a set of view cones where it was not observed that
+summarizes negative observations. We refer to the first component as
+the positive observation distribution and the second as the negative
+regions. 
 
-We account for negative observations with a factored representation
-for the belief state. In one component, we maintain a distribution
-that accounts for positive observations (e.g., a Kalman filter). The
-other component is an explicit representation of the view cones
-associated with negative observations. We refer to the first component
-as the positive observation distribution and the second as the
-negative regions. To sample from this distribution, we perform
-probabilistic rejection sampling: sample from the positive observation
-distribution and then discard the sample with some probability. The probability with which we discard a sample is inversely proportional to the
-probability that it lies in a negative region. The inverse
-probability is given by the following heuristic: $\max(1,\dfrac{\text{penetration
-    depth}}{\text{object radius}})$ where penetration depth is the
-minimum translation distance that takes two objects out of collision and object
-radius is found by approximating the object as a sphere.
-
+Likelihood queries in this model are relatively straightforward. We
+implement sampling with probabilistic rejection sampling: we sample
+from the positive observation distribution and discard the sample with
+probability proportional to the corresponding observation
+likelihood. We answer maximum likelihood queries by sampling
+repeatedly and returning the sample with maximum likelihood.
 
 \subsection{Evaluations}
 We implement our experiments in Python and use
 OpenRave~\cite{Diankov_2008_6117} to represent the environment. We use
-trajectory optimization for our motion planning~\cite{schulman2013finding}
-and implement custom collision checking in Flexible Collision Library~\cite{jia2014fcl} to handle
-collisions. We use the Fast-Forward and Fast-Downward
-task planners to solve our high-level planning problems. Because our system works
-independently of the chosen task planner, we use Fast-Forward in domains involving negative
-preconditions, which are not supported by Fast-Downward. Experiments were run in series on
-Intel Core i7-4770K machines with 16GB RAM. We validate our approach in three distinct scenarios.
+trajectory optimization for our motion
+planning~\cite{schulman2013finding} and implement custom collision
+checking in Flexible Collision Library~\cite{jia2014fcl}. We use the
+Fast-Forward~\cite{FF} and Fast-Downward~\cite{helmert2006fast} task
+planners to solve our high-level planning problems. Experiments were
+run in series on Intel Core i7-4770K machines with 16GB RAM. We
+validate our approach in three distinct scenarios.
 
-To explore ensuring safety in robot navigation tasks under uncertainty, we
-evaluate performance in a corridor domain. We place the robot at one end of a corridor
-and present it with the goal of traversing the corridor, then grasping
-objects on tables on the other side. Uniform distributions model the locations of
-a varying number of obstructing columns throughout the corridor; thus, the solution
-typically ends up as an alternating sequence of observations and motions. Note that this task would be essentially
-insoluble without accounting for negative observations appropriately.
+To explore collision avoidance in robot navigation tasks under
+uncertainty, we evaluate performance in a corridor domain. We place
+the robot at one end of a corridor and present it with the goal of
+finding and grasping objects on the other end of the corridor.  A
+solution in this domain traverses the corridor observing at regular
+intervals to ensure collision avoidance. Uniform distributions model
+the locations of a varying number of obstructing columns throughout
+the corridor. This task would be essentially insoluble
+without a proper accounting of negative observations.
 
-The second task demonstrates the ability to reason about occlusions. We
-set a goal of grasping a target object from a cluttered table with other
-objects on it: some have deterministic locations and others have a Gaussian distribution
-modeling their location. The target object's location is also drawn from a Gaussian
-distribution. \ibsp{} plans to remove any occlusions, to observe the target object, and
-then to pick it up. In our experiments, we maintain that 3 of the objects on the table -- always including
-the target object -- are part of the belief space.
+The second task demonstrates the ability for our system to reason
+about occlusions. We set a goal of grasping a target object from a
+cluttered table with other objects on it: some have deterministic
+locations and others have a Gaussian prior distribution on their
+location. The target object's location is also drawn from a Gaussian
+distribution. \ibsp{} plans to remove any occlusions, observe the
+target object, and then pick it up. In our experiments, 3 of the
+objects on the table have unobserved locations.
 
-In our final scenario, the robot has lost its keys and is trying to locate them among three drawers they could be in.
-This setup illustrates multimodal planning behavior with a mixture of Gaussians as the prior for the target's location.
-Furthermore, we introduce a deterministic object in front of each drawer, which possibly
-obstructs it from being opened. \ibsp{} begins by assuming the target is placed at its maximum likelihood
-location; accordingly, it discovers that the target is obstructed by the drawer containing it, then
-plans to open this drawer. If the outer deterministic object impedes the drawer from opening, this
-obstruction fact is also discovered and accounted for. During execution, upon performing an observation inside the drawer, our system
-chooses to refine the plan if the object was not actually seen (indicating that its true location is in another drawer).
-The new refinement incorporates this negative observation, and the system may then try opening another drawer.
+Our final scenario illustrates planning under a multi-modal initial
+state distribution. The robot has lost its keys and is trying to
+locate them among three drawers they could be in.  We use a mixture of
+Gaussians as the prior for the target's location. Each drawer that
+could contain the object is obstructed from being fully opened by a
+deterministic object. \ibsp{} begins by assuming the target is placed
+at its maximum likelihood location. It discovers that the target is
+occluded by the drawer containing it and plans to open this drawer. If
+the drawer obstruction impedes the drawer from opening far enough for
+the maximum likelihood observation to be useful, this obstruction fact
+is also discovered and accounted for. During execution, we perform an
+observation of the interior of the drawer. If the object is observed
+we continue with the existing plan and achieve our goal. If it is not,
+our system chooses to replan, as the negative observation indicates
+the object is in a different drawer.
 
-Belief distributions containing many modes can be problematic under the \mld{} formulation. Consider a distribution with 100 modes scattered around a large room. It will take a really long time before the robot finds the object, especially if every observe action results in a new ML pose located far away from the current one. The same issue arises when searching for objects with large uniform distributions. All points on a uniform distribution are equally likely so the new ML location is chosen at random.
-
-Another limitation is the use of rejection sampling. There is a noticeable slowdown in planning time when dealing with environments containing many geometric constraints.
-% Table \ref{table:results} shows timing results for the three described
-% tasks. \figref{fig:drawerimgs} and \figref{fig:corridorimgs} show intermediate steps and belief
-% states for the drawer and corridor tasks. The included video demonstrates plan execution for all three tasks.
-
+Table \ref{table:results} shows timing results for the three described
+tasks. \figref{fig:drawerimgs} and \figref{fig:corridorimgs} show
+intermediate steps and belief states for the drawer and corridor
+tasks. The supplementary video demonstrates plan execution for all
+three tasks.
 
 \begin{table}
   \centering
@@ -210,13 +226,16 @@ Another limitation is the use of rejection sampling. There is a noticeable slowd
     \midrule
       Table, 30 obj & 48 & 122 & 1.96\\
     \midrule
-      3-Drawer search & 93 & 325 & 2.11\\
+      3-drawer search & 93 & 325 & 2.11\\
     \bottomrule
   \end{tabular}}
-  \caption{Solution percentages, running times, and number of high-level planner calls for \ibsp{} in
-    occluded search and navigation tasks. Unimodal cluttered table results are from 40
-    randomly generated problems per number of objects. Multimodal 3-drawer search results
-    are from 30 iterations. Uniform corridor navigation results are from 40 random locations of corridor obstructions, per number of objects. Time limit: 1800s.}
+  \caption{Solution percentages, running times, and number of
+    high-level planner calls for \ibsp{} in occluded search and
+    navigation tasks. `Uni. corridor $N$ obj' refers to our corridor
+    navigation task with $N$ obstructions. `Table, $N$ obj' is the
+    cluttered table task with $N$ objects on the table. `3-drawer
+    search' is the multi-modal search problem. Results are averaged
+    across 30 independent runs. Planning runs timeout after 1800s.}
   \label{table:results}
 \end{table}
 
